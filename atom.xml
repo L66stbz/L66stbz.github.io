@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>RoyalHope</title>
+  
+  <subtitle>胜天半子</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://royalhope.gitee.io/"/>
+  <updated>2020-06-11T07:33:37.062Z</updated>
+  <id>http://royalhope.gitee.io/</id>
+  
+  <author>
+    <name>RoyalHope</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Hello World</title>
+    <link href="http://royalhope.gitee.io/2020/06/11/hello-world/"/>
+    <id>http://royalhope.gitee.io/2020/06/11/hello-world/</id>
+    <published>2020-06-11T07:33:37.062Z</published>
+    <updated>2020-06-11T07:33:37.062Z</updated>
+    
+    <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.
+      
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>舒伯特ROSE</title>
+    <link href="http://royalhope.gitee.io/2020/06/10/rose/"/>
+    <id>http://royalhope.gitee.io/2020/06/10/rose/</id>
+    <published>2020-06-10T07:18:52.000Z</published>
+    <updated>2020-06-11T01:35:33.776Z</updated>
+    
+    <content type="html"><![CDATA[<p>这是我的第一篇博客，给大家分享一个一首歌的背后伤感爱情的小故事！</p><h3 id="舒伯特玫瑰"><a href="#舒伯特玫瑰" class="headerlink" title="舒伯特玫瑰"></a>舒伯特玫瑰</h3><p>舒伯特他一直没有结婚</p><p>舒伯特对爱情和婚姻充满了鄙夷，因为他深深为爱受伤，早年他曾有一个非常喜欢的女孩，她也很喜欢他，这个女孩等了舒伯特好多年，但最终因为舒伯特没有稳定的收入去负担一个家庭而分开了，这个女孩不情愿的嫁给了一个有稳定收入的面包师。</p><p><img src="sbt.jpg" alt=""></p><p>在大约1824年的时侯，舒伯特和一个匈牙利伯爵夫人Caroline Esterhazy关系暧昧，但也没有下文。💔</p><p>1828年11月19日，31岁就死于维也纳。据说是治疗梅毒而造成汞中毒。💔<br>舒伯特的一生就像我喜欢你，还是败给了现实。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;这是我的第一篇博客，给大家分享一个一首歌的背后伤感爱情的小故事！&lt;/p&gt;
+&lt;h3 id=&quot;舒伯特玫瑰&quot;&gt;&lt;a href=&quot;#舒伯特玫瑰&quot; class=&quot;headerlink&quot; title=&quot;舒伯特玫瑰&quot;&gt;&lt;/a&gt;舒伯特玫瑰&lt;/h3&gt;&lt;p&gt;舒伯特他一直没有结婚&lt;/p&gt;
+&lt;p&gt;
+      
+    
+    </summary>
+    
+    
+    
+      <category term="Story" scheme="http://royalhope.gitee.io/tags/Story/"/>
+    
+  </entry>
+  
+</feed>
