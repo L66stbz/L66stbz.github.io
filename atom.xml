@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://royalhope.gitee.io/"/>
-  <updated>2020-06-12T09:28:01.169Z</updated>
+  <updated>2020-06-18T06:38:26.068Z</updated>
   <id>http://royalhope.gitee.io/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>test</title>
+    <link href="http://royalhope.gitee.io/2020/06/18/test/"/>
+    <id>http://royalhope.gitee.io/2020/06/18/test/</id>
+    <published>2020-06-18T06:33:58.000Z</published>
+    <updated>2020-06-18T06:38:26.068Z</updated>
+    
+    <content type="html"><![CDATA[<p>[点击下载]（/download/rose.png “源码下载”）</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;[点击下载]（/download/rose.png “源码下载”）&lt;/p&gt;
+
+      
+    
+    </summary>
+    
+    
+    
+  </entry>
   
   <entry>
     <title>程序猿的浪漫——girlfriend 3D相册</title>
