@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://royalhope.gitee.io/"/>
-  <updated>2020-06-18T06:38:26.068Z</updated>
+  <updated>2020-06-18T06:42:04.347Z</updated>
   <id>http://royalhope.gitee.io/</id>
   
   <author>
@@ -21,15 +21,15 @@
     <link href="http://royalhope.gitee.io/2020/06/18/test/"/>
     <id>http://royalhope.gitee.io/2020/06/18/test/</id>
     <published>2020-06-18T06:33:58.000Z</published>
-    <updated>2020-06-18T06:38:26.068Z</updated>
+    <updated>2020-06-18T06:42:04.347Z</updated>
     
-    <content type="html"><![CDATA[<p>[点击下载]（/download/rose.png “源码下载”）</p>]]></content>
+    <content type="html"><![CDATA[<p><a href="/download/rose.png" title="源码下载">点击下载</a></p>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;p&gt;[点击下载]（/download/rose.png “源码下载”）&lt;/p&gt;
+        &lt;p&gt;&lt;a href=&quot;/download/rose.png&quot; title=&quot;源码下载&quot;&gt;点击下载&lt;/a&gt;&lt;/p&gt;
 
       
     
