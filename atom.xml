@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://royalhope.gitee.io/"/>
-  <updated>2020-07-01T13:45:21.285Z</updated>
+  <updated>2020-07-01T13:54:00.301Z</updated>
   <id>http://royalhope.gitee.io/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="http://royalhope.gitee.io/2020/06/30/linux1/"/>
     <id>http://royalhope.gitee.io/2020/06/30/linux1/</id>
     <published>2020-06-30T01:56:37.000Z</published>
-    <updated>2020-07-01T13:45:21.285Z</updated>
+    <updated>2020-07-01T13:54:00.301Z</updated>
     
     <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><p>昨天跟朋友一起在做一个证书的考试，里边有道题涉及到了 Linux中创建目录和文件的权限问题，当时临时也就百度解决了一下， 后来想到Linux应该是可以设置默认权限的，然后就学习了一下。 </p><p> 在linux中创建文件和目录时，单个用户创建的目录权限都是一致的，创建的文件权限也都是一致的，控制这个创建权限的叫做权限掩码。<br>权限掩码的作用就是规范初创文件和目录时候的权限设置，免去了创建后再次修改权限的问题。 </p><h3 id="1、-查看用户的权限掩码"><a href="#1、-查看用户的权限掩码" class="headerlink" title="1、 查看用户的权限掩码"></a>1、 查看用户的权限掩码</h3><p>命令：umask</p><p>目录： 假如权限掩码为022 ，那么该用户创建的目录权限即为最大权限777减去权限掩码022为755 。</p><p>文件： 文件的权限必须为偶数，所以如果是奇数则需减1变为偶数 ，777-022=755 每位减1也就是644。</p><p><img src="1.jpg" alt=""></p><h3 id="2、-修改权限掩码"><a href="#2、-修改权限掩码" class="headerlink" title="2、 修改权限掩码"></a>2、 修改权限掩码</h3><p>命令：umask ###</p><p>###可以是1-3位数，但是每一位的数值必须&lt;=7。</p><p><img src="2.jpg" alt=""></p><h3 id="3、-drwxr-xr-x代表的意思"><a href="#3、-drwxr-xr-x代表的意思" class="headerlink" title="3、 drwxr-xr-x代表的意思"></a>3、 drwxr-xr-x代表的意思</h3><p>①d:第一位表示文件类型。d是目录文件，l是链接文件，-是普通文件，p是管道。</p><p>②rwx:第2-4位表示这个文件拥有者所拥有的权限，r是读，w是写，x是执行。</p><p>③r-x:第5-7位表示和这个文件拥有者所在同一个组的用户所具有的权限。</p><p>④r-x:第8-10位表示其他用户所具有的权限。</p><p>r:read就是读权限     –数字4表示<br>w:write就是写权限    –数字2表示<br>x:excute就是执行权限 –数字1表示</p><p>所以，drwxr-xr-x可以表示为755。</p>]]></content>
     
