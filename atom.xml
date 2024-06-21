@@ -5,9 +5,9 @@
   <subtitle>胜天半子</subtitle>
   <link href="/atom.xml" rel="self"/>
   
-  <link href="http://royalhope.gitee.io/"/>
+  <link href="http://royalhope.github.io/"/>
   <updated>2020-07-01T13:54:00.301Z</updated>
-  <id>http://royalhope.gitee.io/</id>
+  <id>http://royalhope.github.io/</id>
   
   <author>
     <name>RoyalHope</name>
@@ -18,8 +18,8 @@
   
   <entry>
     <title>linux1</title>
-    <link href="http://royalhope.gitee.io/2020/06/30/linux1/"/>
-    <id>http://royalhope.gitee.io/2020/06/30/linux1/</id>
+    <link href="http://royalhope.github.io/2020/06/30/linux1/"/>
+    <id>http://royalhope.github.io/2020/06/30/linux1/</id>
     <published>2020-06-30T01:56:37.000Z</published>
     <updated>2020-07-01T13:54:00.301Z</updated>
     
@@ -36,14 +36,14 @@
     
     
     
-      <category term="Linux" scheme="http://royalhope.gitee.io/tags/Linux/"/>
+      <category term="Linux" scheme="http://royalhope.github.io/tags/Linux/"/>
     
   </entry>
   
   <entry>
     <title>test</title>
-    <link href="http://royalhope.gitee.io/2020/06/18/test/"/>
-    <id>http://royalhope.gitee.io/2020/06/18/test/</id>
+    <link href="http://royalhope.github.io/2020/06/18/test/"/>
+    <id>http://royalhope.github.io/2020/06/18/test/</id>
     <published>2020-06-18T06:33:58.000Z</published>
     <updated>2020-10-24T04:54:46.933Z</updated>
     
@@ -64,8 +64,8 @@
   
   <entry>
     <title>程序猿的浪漫——girlfriend 3D相册</title>
-    <link href="http://royalhope.gitee.io/2020/06/12/Photo-md/"/>
-    <id>http://royalhope.gitee.io/2020/06/12/Photo-md/</id>
+    <link href="http://royalhope.github.io/2020/06/12/Photo-md/"/>
+    <id>http://royalhope.github.io/2020/06/12/Photo-md/</id>
     <published>2020-06-12T08:05:09.000Z</published>
     <updated>2020-06-12T09:28:01.169Z</updated>
     
@@ -82,14 +82,14 @@
     
     
     
-      <category term="html" scheme="http://royalhope.gitee.io/tags/html/"/>
+      <category term="html" scheme="http://royalhope.github.io/tags/html/"/>
     
   </entry>
   
   <entry>
     <title>舒伯特ROSE</title>
-    <link href="http://royalhope.gitee.io/2020/06/10/rose/"/>
-    <id>http://royalhope.gitee.io/2020/06/10/rose/</id>
+    <link href="http://royalhope.github.io/2020/06/10/rose/"/>
+    <id>http://royalhope.github.io/2020/06/10/rose/</id>
     <published>2020-06-10T07:18:52.000Z</published>
     <updated>2020-06-11T01:35:33.776Z</updated>
     
@@ -106,7 +106,7 @@
     
     
     
-      <category term="Story" scheme="http://royalhope.gitee.io/tags/Story/"/>
+      <category term="Story" scheme="http://royalhope.github.io/tags/Story/"/>
     
   </entry>
   
