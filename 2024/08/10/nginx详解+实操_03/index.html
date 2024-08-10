@@ -1,0 +1,412 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>nginx详解+实操_03.md | L66</title><meta name="description" content="[TOC] 1、Nginx 变量Nginx 同 Apache 等其他 Web 服务器的配置记法不太相同，Nginx的配置文件使用语法的就是一门微型的编程语言。可以类似写程序一般编写配置文件，可操作性很大。既然是编程语言，一般也就少不了“变量”这种概念。 1.1 Nginx变量简介 所有的 Nginx变量在 Nginx 配置文件中引用时都须带上$前缀；  在 Nginx 配置中，变量只能存放一种类型"><meta name="keywords" content="Linux,Nginx"><meta name="author" content="L66"><meta name="copyright" content="L66"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/3.jpg"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="dns-prefetch" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="crossorigin"/><link rel="dns-prefetch" href="https://fonts.googleapis.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="dns-prefetch" href="//busuanzi.ibruce.info"/><meta name="twitter:card" content="summary"><meta name="twitter:title" content="nginx详解+实操_03.md"><meta name="twitter:description" content="[TOC] 1、Nginx 变量Nginx 同 Apache 等其他 Web 服务器的配置记法不太相同，Nginx的配置文件使用语法的就是一门微型的编程语言。可以类似写程序一般编写配置文件，可操作性很大。既然是编程语言，一般也就少不了“变量”这种概念。 1.1 Nginx变量简介 所有的 Nginx变量在 Nginx 配置文件中引用时都须带上$前缀；  在 Nginx 配置中，变量只能存放一种类型"><meta name="twitter:image" content="https://l66stbz.github.io/2024/08/10/nginx详解+实操_03/1.png"><meta property="og:type" content="article"><meta property="og:title" content="nginx详解+实操_03.md"><meta property="og:url" content="https://l66stbz.github.io/2024/08/10/nginx%E8%AF%A6%E8%A7%A3+%E5%AE%9E%E6%93%8D_03/"><meta property="og:site_name" content="L66"><meta property="og:description" content="[TOC] 1、Nginx 变量Nginx 同 Apache 等其他 Web 服务器的配置记法不太相同，Nginx的配置文件使用语法的就是一门微型的编程语言。可以类似写程序一般编写配置文件，可操作性很大。既然是编程语言，一般也就少不了“变量”这种概念。 1.1 Nginx变量简介 所有的 Nginx变量在 Nginx 配置文件中引用时都须带上$前缀；  在 Nginx 配置中，变量只能存放一种类型"><meta property="og:image" content="https://l66stbz.github.io/2024/08/10/nginx详解+实操_03/1.png"><meta property="article:published_time" content="2024-08-10T13:50:00.000Z"><meta property="article:modified_time" content="2024-08-10T08:46:56.835Z"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>var autoChangeMode = '1'
+var t = Cookies.get("theme")
+if (autoChangeMode == '1'){
+  var isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+  var isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
+  var isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined){
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport){
+      console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour < 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+  }
+  } else if (t == 'light') activateLightMode()
+  else activateDarkMode()
+
+} else if (autoChangeMode == '2'){
+  now = new Date();
+  hour = now.getHours();
+  isNight = hour < 6 || hour >= 18
+  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode() 
+} else {
+  if ( t == 'dark' ) activateDarkMode()
+  else if ( t == 'light') activateLightMode()
+}
+
+function activateDarkMode(){
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
+  }
+}
+function activateLightMode(){
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
+  }
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="canonical" href="https://l66stbz.github.io/2024/08/10/nginx%E8%AF%A6%E8%A7%A3+%E5%AE%9E%E6%93%8D_03/"><link rel="prev" title="nginx详解+实操_04.md" href="https://l66stbz.github.io/2024/08/10/nginx%E8%AF%A6%E8%A7%A3+%E5%AE%9E%E6%93%8D_04/"><link rel="next" title="nginx详解+实操_02.md" href="https://l66stbz.github.io/2024/08/09/nginx%E8%AF%A6%E8%A7%A3+%E5%AE%9E%E6%93%8D_02/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://xxx/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  baiduPush: false,
+  highlightCopy: true,
+  highlightLang: true,
+  highlightShrink: 'false',
+  isFontAwesomeV5: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+  
+}</script><script>var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isSidebar: true  
+  }</script><noscript><style>
+#page-header {
+  opacity: 1
+}
+.justified-gallery img{
+  opacity: 1
+}
+</style></noscript><link rel="stylesheet" href="APlayer.min.css"><div id="aplayer"></div><script src="https://cdn.jsdelivr.net/gh/radium-bit/res@master/live2d/autoload.js" async></script><script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js" async></script><meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="L66" type="application/atom+xml">
+</head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/2.jpg" onerror="onerror=null;src='/img/2.jpg'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">33</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">22</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 列表</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> Music</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> Photo</span></a></li></ul></div></div></div></div><i class="fa fa-arrow-right on" id="toggle-sidebar" aria-hidden="true">     </i><div id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1、Nginx-变量"><span class="toc-number">1.</span> <span class="toc-text">1、Nginx 变量</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-Nginx变量简介"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 Nginx变量简介</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-1内置预定义变量"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.2.1内置预定义变量</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2、Nginx-监控"><span class="toc-number">2.</span> <span class="toc-text">2、Nginx 监控</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-Nginx的基础监控"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 Nginx的基础监控</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-监控的主要指标"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 监控的主要指标</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-指标的收集"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 指标的收集</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-1-nginx-Stub-Status-监控模块"><span class="toc-number">2.3.1.</span> <span class="toc-text">2.3.1 nginx Stub Status 监控模块</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-补充-扩展-："><span class="toc-number">2.4.</span> <span class="toc-text">2.4 补充(扩展)：</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#nginx-access-log-分析"><span class="toc-number">2.4.0.1.</span> <span class="toc-text">nginx access log 分析</span></a></li></ol></li></ol></li></ol></li></ol></div></div></div><div id="body-wrap"><div class="post-bg" id="nav" style="background-image: url(https://l66stbz.github.io/2024/08/10/nginx详解+实操_03/1.png)"><div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">L66</a></span><span class="pull_right menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 列表</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> Music</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> Photo</span></a></li></ul></div></div><span class="toggle-menu close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span></span></div><div id="post-info"><div id="post-title"><div class="posttitle">nginx详解+实操_03.md</div></div><div id="post-meta"><div class="meta-firstline"><time class="post-meta__date"><span class="post-meta__date-created" title="发表于 2024-08-10 21:50:00"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2024-08-10</span><span class="post-meta__separator">|</span><span class="post-meta__date-updated" title="更新于 2024-08-10 16:46:56"><i class="fa fa-history" aria-hidden="true"></i> 更新于 2024-08-10</span></time></div><div class="meta-secondline"> </div><div class="meta-thirdline"><span class="post-meta-pv-cv"><i class="fa fa-eye post-meta__icon" aria-hidden="true"> </i><span>阅读量:</span><span id="busuanzi_value_page_pv"></span></span><span class="post-meta-commentcount"></span></div></div></div></div><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><p>[TOC]</p>
+<h2 id="1、Nginx-变量"><a href="#1、Nginx-变量" class="headerlink" title="1、Nginx 变量"></a>1、Nginx 变量</h2><p>Nginx 同 Apache 等其他 Web 服务器的配置记法不太相同，Nginx的配置文件使用语法的就是一门微型的编程语言。可以类似写程序一般编写配置文件，可操作性很大。既然是编程语言，一般也就少不了“变量”这种概念。</p>
+<h3 id="1-1-Nginx变量简介"><a href="#1-1-Nginx变量简介" class="headerlink" title="1.1 Nginx变量简介"></a>1.1 Nginx变量简介</h3><ul>
+<li><p>所有的 Nginx变量在 Nginx 配置文件中引用时都须带上<code>$</code>前缀；</p>
+</li>
+<li><p>在 Nginx 配置中，变量只能存放一种类型的值，有且也只存在一种类型，那就是字符串类型；</p>
+</li>
+<li><p>nginx可以使用变量简化配置与提高配置的灵活性，所有的变量值都可以通过这种方式：</p>
+<ul>
+<li><pre><code class="bash">$变量名
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">### 1.2 Nginx 变量的定义和使用</span><br><span class="line"></span><br><span class="line">nginx中的变量分为两种，&#96;自定义变量&#96;与&#96;内置预定义变量&#96;</span><br><span class="line"></span><br><span class="line">#### 1.2.1自定义变量</span><br><span class="line"></span><br><span class="line">**声明变量**</span><br><span class="line">可以在&#96;sever&#96;,&#96;http&#96;,&#96;location&#96;等标签中使用set命令（非唯一）声明变量，语法如下：</span><br><span class="line"></span><br><span class="line">&#96;&#96;&#96;shell</span><br><span class="line">set $变量名 变量值</span><br></pre></td></tr></table></figure>
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>注意:</strong></p>
+<ul>
+<li>nginx 中的变量必须都以$开头</li>
+<li>nginx 的配置文件中所有使用的变量都必须是声明过的，否则 nginx 会无法启动并打印相关异常日志。</li>
+</ul>
+<p><strong>变量的可见性</strong></p>
+<p>在不同层级的标签中声明的变量性的可见性规则如下:</p>
+<ul>
+<li>当前location标签中声明的变量中只对当前location块可以引用；</li>
+<li>当前server标签中声明的变量对当前server块以及当前server块中的所有子块可引用；</li>
+<li>http标签中声明的变量对http块以及http块中的所有子块可见</li>
+</ul>
+<p><strong>nginx安装echo模块</strong></p>
+<p>如果没有安装nginx的话就可以直接按照下列步骤一步步进行，如果已经编译安装过nginx的话，可以对nginx进行平滑升级从而在编译时添加上我们echo模块。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查看已经安装的nginx的版本</span></span><br><span class="line">[root@localhost ~]# nginx -V </span><br><span class="line"><span class="meta">#</span><span class="bash"> 下载<span class="built_in">echo</span>模块的安装包</span></span><br><span class="line">[root@localhost ~]# wget https://github.com/openresty/echo-nginx-module/archive/v0.61.tar.gz</span><br><span class="line"><span class="meta">#</span><span class="bash"> 解压到相同路径下:</span></span><br><span class="line">[root@localhost ~]# tar xf nginx-1.24.0.tar.gz  -C /usr/local/</span><br><span class="line">[root@localhost ~]# tar xf v0.61.tar.gz  -C /usr/local/</span><br><span class="line"><span class="meta">#</span><span class="bash"> 安装编译工具</span></span><br><span class="line">[root@localhost ~]# cd  /usr/local/</span><br><span class="line">[root@localhost local]# yum -y install pcre pcre-devel openssl openssl-devel gcc gcc-c++   zlib zlib-devel</span><br><span class="line"><span class="meta">#</span><span class="bash"> 添加模块：</span></span><br><span class="line">[root@localhost local]# cd nginx-1.24.0/</span><br><span class="line">添加上原来已经有的参数和新添加的模块:</span><br><span class="line">[root@localhost nginx-1.24.0]#  ./configure --prefix=/etc/nginx --sbin-path=/usr/sbin/nginx --modules-path=/usr/lib64/nginx/modules --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --pid-path=/var/run/nginx.pid --lock-path=/var/run/nginx.lock --http-client-body-temp-path=/var/cache/nginx/client_temp --http-proxy-temp-path=/var/cache/nginx/proxy_temp --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp --http-scgi-temp-path=/var/cache/nginx/scgi_temp --user=nginx --group=nginx --with-compat --with-file-aio --with-threads --with-http_addition_module --with-http_auth_request_module --with-http_dav_module --with-http_flv_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_mp4_module --with-http_random_index_module --with-http_realip_module --with-http_secure_link_module --with-http_slice_module --with-http_ssl_module --with-http_stub_status_module --with-http_sub_module --with-http_v2_module --with-mail --with-mail_ssl_module --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --with-cc-opt='-O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mtune=generic -fPIC' --with-ld-opt='-Wl,-z,relro -Wl,-z,now -pie' --add-module=/usr/local/echo-nginx-module-0.61</span><br><span class="line">[root@localhost nginx-1.24.0]# make &amp;&amp; make install </span><br><span class="line"></span><br><span class="line">[root@localhost nginx-1.24.0]# nginx -V  查看模块是否添加成功</span><br><span class="line">nginx version: nginx/1.24.0</span><br><span class="line">built by gcc 4.8.5 20150623 (Red Hat 4.8.5-44) (GCC) </span><br><span class="line">built with OpenSSL 1.0.2k-fips  26 Jan 2017</span><br><span class="line">TLS SNI support enabled</span><br><span class="line">configure arguments: --prefix=/etc/nginx --sbin-path=/usr/sbin/nginx --modules-path=/usr/lib64/nginx/modules --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --pid-path=/var/run/nginx.pid --lock-path=/var/run/nginx.lock --http-client-body-temp-path=/var/cache/nginx/client_temp --http-proxy-temp-path=/var/cache/nginx/proxy_temp --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp --http-scgi-temp-path=/var/cache/nginx/scgi_temp --user=nginx --group=nginx --with-compat --with-file-aio --with-threads --with-http_addition_module --with-http_auth_request_module --with-http_dav_module --with-http_flv_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_mp4_module --with-http_random_index_module --with-http_realip_module --with-http_secure_link_module --with-http_slice_module --with-http_ssl_module --with-http_stub_status_module --with-http_sub_module --with-http_v2_module --with-mail --with-mail_ssl_module --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --with-cc-opt='-O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector-strong --param=ssp-buffer-size=4 -grecord-gcc-switches -m64 -mtune=generic -fPIC' --with-ld-opt='-Wl,-z,relro -Wl,-z,now -pie' --add-module=/usr/local/echo-nginx-module-0.61</span><br><span class="line"></span><br><span class="line">[root@localhost nginx-1.24.0]# useradd nginx	# 创建启动用户</span><br><span class="line"></span><br><span class="line">[root@localhost nginx-1.24.0]# mkdir /var/cache/nginx/	# 创建缓存目录</span><br><span class="line"></span><br><span class="line">[root@localhost nginx-1.24.0]# nginx		# 启动nginx</span><br></pre></td></tr></table></figure>
+
+<p><strong>配置 $foo=hello</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]#  cd /etc/nginx/conf.d/</span><br><span class="line">[root@localhost conf.d]# vim echo.conf</span><br><span class="line">server &#123;</span><br><span class="line">        listen 80;</span><br><span class="line">        server_name     localhost;</span><br><span class="line">        location /test &#123;</span><br><span class="line">                set $foo hello;</span><br><span class="line">                echo "foo: $foo";</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# nginx -s reload</span><br><span class="line">[root@localhost ~]# curl localhost/test</span><br><span class="line">foo: hello</span><br></pre></td></tr></table></figure>
+
+<p><strong>使用大括号插值</strong></p>
+<p>在“变量插值”的上下文中，还有一种特殊情况，即当引用的变量名之后紧跟着变量名的构成字符时（比如后跟字母、数字以及下划线），我们就需要使用特别的记法来消除歧义，例如：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">        listen 80;</span><br><span class="line">        server_name     localhost;</span><br><span class="line">        location /test-brace &#123;</span><br><span class="line">                set $first "hello ";</span><br><span class="line">                echo "$&#123;first&#125;world";</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line">或者</span><br><span class="line">server &#123;</span><br><span class="line">        listen 80;</span><br><span class="line">        server_name     localhost;</span><br><span class="line">        location /test-brace &#123;</span><br><span class="line">                set $first "hello";</span><br><span class="line">                echo "$first world";</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# nginx -s reload </span><br><span class="line">[root@localhost ~]# curl localhost/test-brace</span><br><span class="line">hello world</span><br></pre></td></tr></table></figure>
+
+<p>这里，我们在 echo 配置指令的参数值中引用变量 first 的时候，后面紧跟着 world 这个单词，所以如果直接写作 “firstworld” 则 Nginx “变量插值”计算引擎会将之识别为引用了变量 firstworld. 为了解决这个难题，Nginx 的字符串记法支持使用花括号在  之后把变量名围起来，比如这里的 ${first}。</p>
+<p><strong>变量作用域</strong></p>
+<p>set 指令不仅有赋值的功能，它还有创建 Nginx 变量的作用，即当作为赋值对象的变量尚不存在时，它会自动创建该变量。如果我们不创建就直接使用它的值，则会报错。<br> 例如</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    ...</span><br><span class="line">    location /bad &#123;</span><br><span class="line">        echo $foo;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时 Nginx 服务器会拒绝加载配置:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# nginx -s reload </span><br><span class="line">nginx: [emerg] unknown "foo" variable</span><br><span class="line">nginx: configuration file /etc/nginx/nginx.conf test failed</span><br></pre></td></tr></table></figure>
+
+<p>Nginx 变量的创建和赋值操作发生在全然不同的时间阶段，Nginx 变量的创建只能发生在 Nginx 配置加载的时候，或者说 Nginx 启动的时候，而赋值操作则只会发生在请求实际处理的时候。<br> 这意味着不创建而直接使用变量会导致启动失败，同时也意味着我们无法在请求处理时动态地创建新的 Nginx 变量。</p>
+<p>Nginx 变量一旦创建，其变量名的可见范围就是整个 Nginx 配置，甚至可以跨越不同虚拟主机的 server 配置块。我们来看一个例子：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">        listen 80;</span><br><span class="line">        server_name     localhost;</span><br><span class="line">        location /foo &#123;</span><br><span class="line">                echo "foo = [$foo]";</span><br><span class="line">        &#125;</span><br><span class="line">        location /bar &#123;</span><br><span class="line">                set $foo 32;</span><br><span class="line">                echo "foo = [$foo]";</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# curl 'http://localhost/foo'</span><br><span class="line">foo = []</span><br><span class="line">[root@localhost ~]# curl 'http://localhost/bar'</span><br><span class="line">foo = [32]</span><br></pre></td></tr></table></figure>
+
+<p>这里我们在 location /bar 中用 set 指令创建了变量 foo，于是在整个配置文件中这个变量都是可见的，因此我们可以在 location /foo 中直接引用这个变量而不用担心 Nginx 会报错。<br> 从这个例子我们可以看到，set 指令因为是在 location /bar 中使用的，所以赋值操作只会在访问 /bar 的请求中执行。而请求 /foo 接口时，我们总是得到空的 foo值，因为用户变量未赋值就输出的话，得到的便是空字符串。</p>
+<p>从这个例子我们可以窥见的另一个重要特性是，Nginx 变量名的可见范围虽然是整个配置，但每个请求都有所有变量的独立副本，或者说都有各变量用来存放值的容器的独立副本，彼此互不干扰。比如前面我们请求了 /bar 接口后，foo 变量被赋予了值 32，但它丝毫不会影响后续对 /foo 接口的请求所对应的 foo 值（它仍然是空的！），因为各个请求都有自己独立的 $foo 变量的副本。</p>
+<h4 id="1-2-1内置预定义变量"><a href="#1-2-1内置预定义变量" class="headerlink" title="1.2.1内置预定义变量"></a>1.2.1内置预定义变量</h4><p>内置预定义变量即无需声明就可以使用的变量，通常包括一个http请求或响应中一部分内容的值，以下为一些常用的内置预定义变量</p>
+<table>
+<thead>
+<tr>
+<th align="left"><strong>变量名</strong></th>
+<th><strong>定义</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>$arg_PARAMETER</code></td>
+<td>GET请求中变量名PARAMETER参数的值。</td>
+</tr>
+<tr>
+<td align="left"><code>$args</code></td>
+<td>这个变量等于GET请求中的参数。例如，foo=123&amp;bar=blahblah;这个变量只可以被修改</td>
+</tr>
+<tr>
+<td align="left"><code>$binary_remote_addr</code></td>
+<td>二进制码形式的客户端地址。</td>
+</tr>
+<tr>
+<td align="left"><code>$body_bytes_sent</code></td>
+<td>传送页面的字节数</td>
+</tr>
+<tr>
+<td align="left"><code>$content_length</code></td>
+<td>请求头中的Content-length字段。</td>
+</tr>
+<tr>
+<td align="left"><code>$content_type</code></td>
+<td>请求头中的Content-Type字段。</td>
+</tr>
+<tr>
+<td align="left"><code>$cookie_COOKIE</code></td>
+<td>cookie COOKIE的值。</td>
+</tr>
+<tr>
+<td align="left"><code>$document_root</code></td>
+<td>当前请求在root指令中指定的值。</td>
+</tr>
+<tr>
+<td align="left"><code>$document_uri</code></td>
+<td>与$uri相同。</td>
+</tr>
+<tr>
+<td align="left"><code>$host</code></td>
+<td>请求中的主机头(Host)字段，如果请求中的主机头不可用或者空，则为处理请求的server名称(处理请求的server的server_name指令的值)。值为小写，不包含端口。</td>
+</tr>
+<tr>
+<td align="left"><code>$hostname</code></td>
+<td>机器名使用 gethostname系统调用的值</td>
+</tr>
+<tr>
+<td align="left"><code>$http_HEADER</code></td>
+<td>HTTP请求头中的内容，HEADER为HTTP请求中的内容转为小写，-变为_(破折号变为下划线)，例如：$http_user_agent(Uaer-Agent的值);</td>
+</tr>
+<tr>
+<td align="left"><code>$sent_http_HEADER</code></td>
+<td>HTTP响应头中的内容，HEADER为HTTP响应中的内容转为小写，-变为_(破折号变为下划线)，例如： <code>$sent_http_cache_control, $sent_http_content_type…;</code></td>
+</tr>
+<tr>
+<td align="left"><code>$is_args</code></td>
+<td>如果$args设置，值为”?”，否则为””。</td>
+</tr>
+<tr>
+<td align="left"><code>$limit_rate</code></td>
+<td>这个变量可以限制连接速率。</td>
+</tr>
+<tr>
+<td align="left"><code>$nginx_version</code></td>
+<td>当前运行的nginx版本号。</td>
+</tr>
+<tr>
+<td align="left"><code>$query_string</code></td>
+<td>与$args相同</td>
+</tr>
+<tr>
+<td align="left"><code>$remote_addr</code></td>
+<td>客户端的IP地址。</td>
+</tr>
+<tr>
+<td align="left"><code>$remote_port</code></td>
+<td>客户端的端口。</td>
+</tr>
+<tr>
+<td align="left"><code>$remote_user</code></td>
+<td>已经经过Auth Basic Module验证的用户名。</td>
+</tr>
+<tr>
+<td align="left"><code>$request_filename</code></td>
+<td>当前连接请求的文件路径，由root或alias指令与URI请求生成。</td>
+</tr>
+<tr>
+<td align="left"><code>$request_body</code></td>
+<td>这个变量（0.7.58+）包含请求的主要信息。在使用proxy_pass或fastcgi_pass指令的location中比较有意义。</td>
+</tr>
+<tr>
+<td align="left"><code>$request_body_file</code></td>
+<td>客户端请求主体信息的临时文件名。</td>
+</tr>
+<tr>
+<td align="left"><code>$request_completion</code></td>
+<td>如果请求成功，设为”OK”；如果请求未完成或者不是一系列请求中最后一部分则设为空。</td>
+</tr>
+<tr>
+<td align="left"><code>$request_method</code></td>
+<td>这个变量是客户端请求的动作，通常为GET或POST。包括0.8.20及之前的版本中，这个变量总为main request中的动作，如果当前请求是一个子请求，并不使用这个当前请求的动作。</td>
+</tr>
+<tr>
+<td align="left"><code>$request_uri</code></td>
+<td>这个变量等于包含一些客户端请求参数的原始URI，它无法修改，请查看$uri更改或重写URI。</td>
+</tr>
+<tr>
+<td align="left"><code>$scheme</code></td>
+<td>所用的协议，比如http或者是https，比如rewrite ^(.+)$ $scheme://example.com$1 redirect;</td>
+</tr>
+<tr>
+<td align="left"><code>$server_addr</code></td>
+<td>服务器地址，在完成一次系统调用后可以确定这个值，如果要绕开系统调用，则必须在listen中指定地址并且使用bind参数。</td>
+</tr>
+<tr>
+<td align="left"><code>$server_name</code></td>
+<td>服务器名称。</td>
+</tr>
+<tr>
+<td align="left"><code>$server_port</code></td>
+<td>请求到达服务器的端口号。</td>
+</tr>
+<tr>
+<td align="left"><code>$server_protocol</code></td>
+<td>请求使用的协议，通常是HTTP/1.0或HTTP/1.1。</td>
+</tr>
+<tr>
+<td align="left"><code>$uri</code></td>
+<td>请求中的当前URI(不带请求参数，参数位于args，不同于浏览器传递的args)，不同于浏览器传递的request_uri的值，它可以通过内部重定向，或者使用index指令进行修改。不包括协议和主机名，例如/foo/bar.html</td>
+</tr>
+</tbody></table>
+<p>Nginx 内置变量最常见的用途就是获取关于请求或响应的各种信息。</p>
+<p><strong>uri  vs request_uri</strong></p>
+<p>由 <code>ngx_http_core</code> 模块提供的内建变量 uri，可以用来获取当前请求的 URI（不含请求参数），<br>而 request_uri 则用来获取请求最原始的 URI（包含请求参数）。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">        listen 80;</span><br><span class="line">        server_name     localhost;</span><br><span class="line">        location /test-uri &#123;</span><br><span class="line">                echo "uri = $uri";</span><br><span class="line">                echo "request_uri = $request_uri";</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# nginx -s reload </span><br><span class="line">[root@localhost ~]# curl localhost/test-uri</span><br><span class="line">uri = /test-uri</span><br><span class="line">request_uri = /test-uri</span><br><span class="line"></span><br><span class="line">[root@localhost ~]# curl "localhost/test-uri?a=3&amp;b=4"</span><br><span class="line">uri = /test-uri</span><br><span class="line">request_uri = /test-uri?a=3&amp;b=4</span><br><span class="line"></span><br><span class="line">[root@localhost ~]# curl "localhost/test-uri/hello%20world?a=3&amp;b=4"</span><br><span class="line">uri = /test-uri/hello world</span><br><span class="line">request_uri = /test-uri/hello%20world?a=3&amp;b=4</span><br></pre></td></tr></table></figure>
+
+<p><strong>$arg_XXX</strong></p>
+<p>另一个特别常用的内建变量其实并不是单独一个变量，而是有无限多变种的一群变量，即名字以 arg_ 开头的所有变量，我们估且称之为 arg_XXX 变量群。<br> 一个例子是 arg_name，这个变量的值是当前请求中名为 name 的参数的值，而且还是未解码的原始形式的值。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# vim /etc/nginx/conf.d/echo.conf</span><br><span class="line"></span><br><span class="line">server &#123;</span><br><span class="line">        listen 80;</span><br><span class="line">        server_name     localhost;</span><br><span class="line">        location /test-arg &#123;</span><br><span class="line">        echo "name: $arg_name";</span><br><span class="line">        echo "class: $arg_class";</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# nginx -s reload</span><br><span class="line">[root@localhost ~]# curl localhost/test-arg</span><br><span class="line">name: </span><br><span class="line">class: </span><br><span class="line"></span><br><span class="line">[root@localhost ~]# curl "localhost/test-arg?name=Tom&amp;class=3"</span><br><span class="line">name: Tom</span><br><span class="line">class: 3</span><br><span class="line"> </span><br><span class="line">[root@localhost ~]# curl "localhost/test-arg?name=hello%20world&amp;class=9"</span><br><span class="line">name: hello%20world</span><br><span class="line">class: 9</span><br></pre></td></tr></table></figure>
+
+<p><strong>3、$arg_XXX 不区分大小写</strong></p>
+<p>其实 $arg_name 不仅可以匹配 name 参数，也可以匹配 NAME 参数，抑或是 Name，Nginx 会在匹配参数名之前，自动把原始请求中的参数名调整为全部小写的形式。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# curl "localhost/test-arg?NAME=Marry"</span><br><span class="line">name: Marry</span><br><span class="line">class: </span><br><span class="line">[root@localhost ~]# curl "localhost/test-arg?Name=Jimmy&amp;class=DSfef"</span><br><span class="line">name: Jimmy</span><br><span class="line">class: DSfef</span><br></pre></td></tr></table></figure>
+
+<h2 id="2、Nginx-监控"><a href="#2、Nginx-监控" class="headerlink" title="2、Nginx 监控"></a>2、Nginx 监控</h2><h3 id="2-1-Nginx的基础监控"><a href="#2-1-Nginx的基础监控" class="headerlink" title="2.1 Nginx的基础监控"></a>2.1 Nginx的基础监控</h3><ul>
+<li>进程监控：确保Nginx进程正常运行，没有异常退出或阻塞。</li>
+<li>端口监控：监控Nginx监听的端口状态，确保端口没有被意外占用或关闭。</li>
+</ul>
+<p><strong>注意： 这两个是必须要加在zabbix监控，加触发器有问题及时告警。</strong></p>
+<p>web 服务器 nginx 以其高性能与抗并发能力越来越多的被用户使用</p>
+<p>Nginx 提供了 <code>ngx_http_stub_status_module</code>，<code>ngx_http_reqstat_module</code>模块，这个模块提供了基本的监控功能</p>
+<h3 id="2-2-监控的主要指标"><a href="#2-2-监控的主要指标" class="headerlink" title="2.2 监控的主要指标"></a>2.2 监控的主要指标</h3><p>我们需要对以下主要的指标进行监控：</p>
+<p><strong>基本活跃指标</strong></p>
+<p>Accepts（接受）、Handled（已处理）、Requests（请求数）是一直在增加的计数器。Active（活跃）</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>描述</th>
+<th>指标类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Accepts（接受）</td>
+<td>NGINX 所接受的客户端连接数</td>
+<td>资源: 功能</td>
+</tr>
+<tr>
+<td>Handled（已处理）</td>
+<td>成功的客户端连接数</td>
+<td>资源: 功能</td>
+</tr>
+<tr>
+<td>Dropped（已丢弃，计算得出）</td>
+<td>丢弃的连接数（接受 - 已处理）</td>
+<td>工作：错误*</td>
+</tr>
+<tr>
+<td>Requests（请求数）</td>
+<td>客户端请求数</td>
+<td>工作：吞吐量</td>
+</tr>
+</tbody></table>
+<p><strong>每秒请求数 – QPS</strong></p>
+<p>​    监控每秒的请求数量，有助于评估服务器的负载情况，以及及时发现潜在的恶意攻击或服务可用性问题。通过持续的 QPS 监控，可以立刻发现是否被恶意攻击或对服务的可用性进行评估。虽然当问题发生时，通过 QPS 不能定位到确切问题的位置，但是他却可以在第一时间提醒你环境可能出问题了</p>
+<p><strong>服务器错误率</strong></p>
+<p>通过监控固定时间间隔内的错误代码（<code>4XX</code>代码表示客户端错误，<code>5XX</code>代码表示服务器端错误），可以了解到客户端收到的结果是否是正确的错误率突然的飙升很可能是你的网站漏洞发出的信号</p>
+<p> 如果你希望通过 access log 分析错误率，那么你需要配置 nginx 的日志模块，让 nginx 将响应码写入访问日志</p>
+<h3 id="2-3-指标的收集"><a href="#2-3-指标的收集" class="headerlink" title="2.3 指标的收集"></a>2.3 指标的收集</h3><p>通过在编译时加入 <code>nginx</code> 的 <code>ngx_http_stub_status_module</code> 模块我们可以实时监控以下基本的指标：</p>
+<h4 id="2-3-1-nginx-Stub-Status-监控模块"><a href="#2-3-1-nginx-Stub-Status-监控模块" class="headerlink" title="2.3.1 nginx Stub Status 监控模块"></a>2.3.1 nginx Stub Status 监控模块</h4><p>　先使用命令查看是否已经安装这个模块：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> -V大写会显示版本号和模块等信息、v小写仅显示版本信息</span></span><br><span class="line">[root@localhost ~]# nginx -V</span><br></pre></td></tr></table></figure>
+
+<p>如果没有此模块，需要重新安装，编译命令如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./configure –with-http_stub_status_module</span><br></pre></td></tr></table></figure>
+
+<p>具体的使用方法是在执行 ./configure 时，指定 –with-http_stub_status_module，然后通过配置：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">        listen 80;</span><br><span class="line">        server_name localhost;</span><br><span class="line">        location /nginx-status &#123;</span><br><span class="line">                stub_status     on;</span><br><span class="line">                access_log      on;</span><br><span class="line">                &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>Nginx 状态查看</strong></p>
+<p>配置完成后在浏览器中输入<a href="http://10.0.105.207/nginx-status" target="_blank" rel="noopener">http://10.0.105.207/nginx-status</a> 查看</p>
+<p>（或者用 <code>curl localhost/nginx-status</code>），显示信息如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Active connections: 2 </span><br><span class="line">server accepts handled requests</span><br><span class="line"> 26 26 48 </span><br><span class="line">Reading: 0 Writing: 1 Waiting: 1</span><br></pre></td></tr></table></figure>
+
+<p><strong>Stub Status 参数说明</strong></p>
+<p>　　正常情况下waiting数量是比较多的，并不能说明性能差。如果reading+writing数量比较多说明服务并发有问题。</p>
+<p><img src="/2024/08/10/nginx%E8%AF%A6%E8%A7%A3+%E5%AE%9E%E6%93%8D_03/1562035977477.png" alt="1562035977477"></p>
+<p>  Active connections:2    #当前nginx处理请求的数目(活跃的连接数)</p>
+<p>server   accepts    handled     requests<br>                 26             26                 48 </p>
+<p> nginx总共处理了26个连接，成功创建26次握手，也就是成功的连接数connection.  总共处理了48个请求 </p>
+<p>   失败连接＝（总连接数－成功连接数）(相等表示中间没有失败的),</p>
+<h3 id="2-4-补充-扩展-："><a href="#2-4-补充-扩展-：" class="headerlink" title="2.4 补充(扩展)："></a>2.4 补充(扩展)：</h3><h5 id="nginx-access-log-分析"><a href="#nginx-access-log-分析" class="headerlink" title="nginx access log 分析"></a>nginx access log 分析</h5><p>nginx 的 access log 中可以记录很多有价值的信息，通过分析 access log，可以收集到很多指标</p>
+<p>1.制作nginx的日志切割，每天凌晨切割并压缩。</p>
+<p>PV：PV(<a href="https://www.baidu.com/s?wd=%E8%AE%BF%E9%97%AE%E9%87%8F&tn=SE_PcZhidaonwhc_ngpagmjz&rsv_dl=gh_pc_zhidao" target="_blank" rel="noopener">访问量</a>)： 即Page View, 即页面浏览量或<a href="https://www.baidu.com/s?wd=%E7%82%B9%E5%87%BB%E9%87%8F&tn=SE_PcZhidaonwhc_ngpagmjz&rsv_dl=gh_pc_zhidao" target="_blank" rel="noopener">点击量</a>，用户每次刷新即被计算一次。</p>
+<p>UV：UV(独立访客)：即Unique Visitor,访问您网站的一台<a href="https://www.baidu.com/s?wd=%E7%94%B5%E8%84%91%E5%AE%A2%E6%88%B7%E7%AB%AF&tn=SE_PcZhidaonwhc_ngpagmjz&rsv_dl=gh_pc_zhidao" target="_blank" rel="noopener">电脑客户端</a>为一个访客。00:00-24:00内相同的客户端只被计算一次。</p>
+<p><strong>工作常用(面试题笔试):</strong></p>
+<p>1.根据访问IP统计UV</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">awk '&#123;print $1&#125;'  access.log|sort | uniq -c |wc -l</span><br></pre></td></tr></table></figure>
+
+
+
+<p>2.统计访问URL统计PV</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">awk &#39;&#123;print $7&#125;&#39; access.log|wc -l</span><br></pre></td></tr></table></figure>
+
+
+
+<p>3.查询访问最频繁的URL</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">awk &#39;&#123;print $7&#125;&#39; access.log|sort | uniq -c |sort -n -k 1 -r|more</span><br></pre></td></tr></table></figure>
+
+
+
+<p>4.查询访问最频繁的IP</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">awk &#39;&#123;print $1&#125;&#39; access.log|sort | uniq -c |sort -n -k 1 -r|more</span><br></pre></td></tr></table></figure>
+
+
+
+<p>5.查询访问最频繁的前10的IP</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">awk '&#123;print $1&#125;' access.log|sort | uniq -c |sort -n -k 1 -r|head -n 10</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+<p>一些常见常用的切割和监控的相关指标和命令的范例:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">1. 统计2017年9月5日 PV量</span><br><span class="line">   grep '05/Sep/2017' cd.mobiletrain.org.log |wc -l</span><br><span class="line"></span><br><span class="line">2. 8点-9点间</span><br><span class="line">   awk '$4&gt;="[05/Sep/2017:08:00:00" &amp;&amp; $4&lt;="[05/Sep/2017:09:00:00" &#123;print $0&#125;'  sz.mobiletrain.org.log | wc -l</span><br><span class="line"></span><br><span class="line">3. 统计2017年9月5日 一天内访问最多的10个IP（ip top10）</span><br><span class="line">   grep '05/Sep/2017' cd.mobiletrain.org.log | awk '&#123; ips[$1]++ &#125; END&#123;for(i in ips)&#123;print i,ips[i]&#125; &#125; '| sort -k2 -rn | head -n10</span><br><span class="line"></span><br><span class="line">4. 统计2017年9月5日 访问大于100次的IP</span><br><span class="line">   grep '05/Sep/2017' cd.mobiletrain.org.log | awk '&#123; ips[$1]++ &#125; END&#123;for(i in ips)&#123; if(ips[i]&gt;100)  &#123;print i,ips[i]&#125;&#125; &#125; '| sort -k2 -rn | head -n10</span><br><span class="line"></span><br><span class="line">5. 统计2017年9月5日 访问最多的10个页面（$request top 10）</span><br><span class="line">   grep '05/Sep/2017' cd.mobiletrain.org.log |awk '&#123;urls[$7]++&#125; END&#123;for(i in urls)&#123;print urls[i],i&#125;&#125;' |sort -k1 -rn |head -n10</span><br><span class="line"></span><br><span class="line">6. 统计2017年9月5日 每个URL访问内容总大小（$body_bytes_sent）</span><br><span class="line">   grep '05/Sep/2017' sz.mobiletrain.org.log |</span><br><span class="line">   awk '&#123; urls[$7]++; size[$7]+=$10&#125;</span><br><span class="line">   END&#123;for(i in urls)&#123;print urls[i],size[i],i&#125;&#125;'|</span><br><span class="line">   sort -k1 -rn | head -n10</span><br><span class="line"></span><br><span class="line">7. 统计2017年9月5日 每个IP访问状态码数量（$status）</span><br><span class="line">   grep '05/Sep/2017' cd.mobiletrain.org.log | </span><br><span class="line">   awk '&#123; ip_code[$1" "$9]++&#125;</span><br><span class="line">   END&#123; for(i in ip_code)&#123;print i,ip_code[i]&#125; &#125;' | </span><br><span class="line">   sort -k1 -rn | head -n10</span><br><span class="line"></span><br><span class="line">8. 统计2017年9月5日 每个IP访问状态码为404及出现次数（$status）</span><br><span class="line">   grep '05/Sep/2017' cd.mobiletrain.org.log |</span><br><span class="line">    awk '$9=="404"&#123;ccc[$1" "$9]++&#125;</span><br><span class="line">   END&#123;for(i in ccc)&#123;print i,ccc[i]&#125;&#125;'  | </span><br><span class="line">   sort -k3 -rn</span><br><span class="line"></span><br><span class="line">9. 统计前一分钟的PV量</span><br><span class="line"></span><br><span class="line"> date=$(date -d '-1 minute' +%Y:%H:%M);  awk -v date=$date '$0 ~ date&#123;i++&#125;END&#123;print i&#125;' /var/log/nginx/xuleilinux.access.log </span><br><span class="line"></span><br><span class="line">9. 统计2017年9月5日 8:30－9:00，每个IP，出现404状态码的数量</span><br><span class="line">   awk '$4&gt;="[05/Sep/2017:08:30:00" &amp;&amp; </span><br><span class="line"><span class="meta">   $</span><span class="bash">4&lt;=<span class="string">"[05/Sep/2017:09:00:00"</span> </span></span><br><span class="line">   &#123;if($9=="404")&#123;ip_code[$1" "$9]++&#125;&#125;</span><br><span class="line">   END&#123;for(i in ip_code)&#123;print i,ip_code[i]&#125;&#125;' </span><br><span class="line">   sz.mobiletrain.org.log </span><br><span class="line"></span><br><span class="line">10. 统计2017年9月5日 各种状态码数量</span><br><span class="line">    grep '05/Sep/2017' sz.mobiletrain.org.log  | </span><br><span class="line">    awk '&#123;code[$9]++&#125; END&#123;for(i in code)&#123;print i,code[i]&#125;&#125;'</span><br></pre></td></tr></table></figure>
+
+
+
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">L66</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://l66stbz.github.io/2024/08/10/nginx%E8%AF%A6%E8%A7%A3+%E5%AE%9E%E6%93%8D_03/">https://l66stbz.github.io/2024/08/10/nginx%E8%AF%A6%E8%A7%A3+%E5%AE%9E%E6%93%8D_03/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://l66stbz.github.io" target="_blank">L66</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linux/">Linux</a><a class="post-meta__tags" href="/tags/Nginx/">Nginx</a></div><div class="post_share"><div class="social-share" data-image="https://l66stbz.github.io/2024/08/10/nginx详解+实操_04/1.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"/><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-button button--primary button--animated"> <i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="post-qr-code__img" src="/img/wechat.jpg" alt="微信"/><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="post-qr-code__img" src="/img/alipay.jpg" alt="支付寶"/><div class="post-qr-code__desc">支付寶</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="prev-post pull_left"><a href="/2024/08/10/nginx%E8%AF%A6%E8%A7%A3+%E5%AE%9E%E6%93%8D_04/"><img class="prev_cover" src="https://l66stbz.github.io/2024/08/10/nginx详解+实操_04/1.png" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">nginx详解+实操_04.md</div></div></a></div><div class="next-post pull_right"><a href="/2024/08/09/nginx%E8%AF%A6%E8%A7%A3+%E5%AE%9E%E6%93%8D_02/"><img class="next_cover" src="https://l66stbz.github.io/2024/08/09/nginx详解+实操_02/1.png" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">nginx详解+实操_02.md</div></div></a></div></nav><div class="relatedPosts"><div class="relatedPosts_headline"><i class="fa fa-fw fa-thumbs-up" aria-hidden="true"></i><span> 相关推荐</span></div><div class="relatedPosts_list"><div class="relatedPosts_item"><a href="/2024/07/05/WEB服务器/" title="WEB服务器"><img class="relatedPosts_cover" src="https://l66stbz.github.io/2024/07/05/WEB服务器/4.png"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2024-07-05</div><div class="relatedPosts_title">WEB服务器</div></div></a></div><div class="relatedPosts_item"><a href="/2024/08/09/nginx详解+实操_02/" title="nginx详解+实操_02.md"><img class="relatedPosts_cover" src="https://l66stbz.github.io/2024/08/09/nginx详解+实操_02/1.png"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2024-08-09</div><div class="relatedPosts_title">nginx详解+实操_02.md</div></div></a></div><div class="relatedPosts_item"><a href="/2024/08/10/nginx详解+实操_04/" title="nginx详解+实操_04.md"><img class="relatedPosts_cover" src="https://l66stbz.github.io/2024/08/10/nginx详解+实操_04/1.png"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2024-08-10</div><div class="relatedPosts_title">nginx详解+实操_04.md</div></div></a></div><div class="relatedPosts_item"><a href="/2024/05/18/Zabbix监控Nginx指标/" title="Zabbix监控Nginx指标"><img class="relatedPosts_cover" src="https://l66stbz.github.io/2024/05/18/Zabbix监控Nginx指标/1.png"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2024-05-18</div><div class="relatedPosts_title">Zabbix监控Nginx指标</div></div></a></div><div class="relatedPosts_item"><a href="/2024/05/24/自动化脚本/" title="自动化脚本"><img class="relatedPosts_cover" src="https://l66stbz.github.io/2024/05/24/自动化脚本/1.png"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2024-05-24</div><div class="relatedPosts_title">自动化脚本</div></div></a></div><div class="relatedPosts_item"><a href="/2024/08/09/nginx详解+实操_01/" title="nginx详解+实操_01.md"><img class="relatedPosts_cover" src="https://l66stbz.github.io/2024/08/09/nginx详解+实操_01/1.png"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2024-08-09</div><div class="relatedPosts_title">nginx详解+实操_01.md</div></div></a></div></div><div class="clear_both"></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By L66</div><div class="framework-info"><span>驱动 </span><a href="https://hexo.io" target="_blank" rel="noopener"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 </span><a href="https://github.com/jerryc127/hexo-theme-butterfly" target="_blank" rel="noopener"><span>Butterfly</span></a></div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><i class="fa fa-book" id="readmode" title="阅读模式"></i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换" target="_self">繁</a><i class="darkmode fa fa-moon-o" id="darkmode" title="夜间模式"></i></div><div id="rightside-config-show"><div id="rightside_config" title="设置"><i class="fa fa-cog" aria-hidden="true"></i></div><i class="fa fa-list-ul close" id="mobile-toc-button" title="目录" aria-hidden="true"></i><i class="fa fa-arrow-up" id="go-up" title="回到顶部" aria-hidden="true"></i></div></section><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@3/instantpage.min.js" type="module"></script><script src="/js/third-party/click_heart.js"></script></body></html>
