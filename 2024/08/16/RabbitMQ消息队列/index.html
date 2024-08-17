@@ -1,0 +1,420 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RabbitMQ消息队列 | L66</title><meta name="description" content="RabbitMQ 消息中间件&#x2F;消息队列[TOC] 1、消息中间件1.1 简介消息队列（Message Queue，简称 MQ）是一种用于跨进程或跨系统的异步通信机制。它允许不同的服务、应用程序或进程之间传递消息，从而实现解耦和高效的任务处理。消息队列通常用于异步处理、分布式系统、负载均衡等场景。 消息传递指的是程序之间通过在消息中发送数据进行通信。 当下主流的消息中间件有RabbitMQ、Kafk"><meta name="keywords" content="Linux,Redis,Cluster"><meta name="author" content="L66"><meta name="copyright" content="L66"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/3.jpg"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="dns-prefetch" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="crossorigin"/><link rel="dns-prefetch" href="https://fonts.googleapis.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="dns-prefetch" href="//busuanzi.ibruce.info"/><meta name="twitter:card" content="summary"><meta name="twitter:title" content="RabbitMQ消息队列"><meta name="twitter:description" content="RabbitMQ 消息中间件&#x2F;消息队列[TOC] 1、消息中间件1.1 简介消息队列（Message Queue，简称 MQ）是一种用于跨进程或跨系统的异步通信机制。它允许不同的服务、应用程序或进程之间传递消息，从而实现解耦和高效的任务处理。消息队列通常用于异步处理、分布式系统、负载均衡等场景。 消息传递指的是程序之间通过在消息中发送数据进行通信。 当下主流的消息中间件有RabbitMQ、Kafk"><meta name="twitter:image" content="https://l66stbz.github.io/2024/08/16/RabbitMQ消息队列/1.png"><meta property="og:type" content="article"><meta property="og:title" content="RabbitMQ消息队列"><meta property="og:url" content="https://l66stbz.github.io/2024/08/16/RabbitMQ%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/"><meta property="og:site_name" content="L66"><meta property="og:description" content="RabbitMQ 消息中间件&#x2F;消息队列[TOC] 1、消息中间件1.1 简介消息队列（Message Queue，简称 MQ）是一种用于跨进程或跨系统的异步通信机制。它允许不同的服务、应用程序或进程之间传递消息，从而实现解耦和高效的任务处理。消息队列通常用于异步处理、分布式系统、负载均衡等场景。 消息传递指的是程序之间通过在消息中发送数据进行通信。 当下主流的消息中间件有RabbitMQ、Kafk"><meta property="og:image" content="https://l66stbz.github.io/2024/08/16/RabbitMQ消息队列/1.png"><meta property="article:published_time" content="2024-08-16T14:50:00.000Z"><meta property="article:modified_time" content="2024-08-17T07:58:37.656Z"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>var autoChangeMode = '1'
+var t = Cookies.get("theme")
+if (autoChangeMode == '1'){
+  var isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+  var isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
+  var isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined){
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport){
+      console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour < 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+  }
+  } else if (t == 'light') activateLightMode()
+  else activateDarkMode()
+
+} else if (autoChangeMode == '2'){
+  now = new Date();
+  hour = now.getHours();
+  isNight = hour < 6 || hour >= 18
+  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode() 
+} else {
+  if ( t == 'dark' ) activateDarkMode()
+  else if ( t == 'light') activateLightMode()
+}
+
+function activateDarkMode(){
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
+  }
+}
+function activateLightMode(){
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
+  }
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="canonical" href="https://l66stbz.github.io/2024/08/16/RabbitMQ%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/"><link rel="next" title="Redis-Cluster集群" href="https://l66stbz.github.io/2024/08/15/Redis-Cluster%E9%9B%86%E7%BE%A4/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://xxx/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  baiduPush: false,
+  highlightCopy: true,
+  highlightLang: true,
+  highlightShrink: 'false',
+  isFontAwesomeV5: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+  
+}</script><script>var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isSidebar: true  
+  }</script><noscript><style>
+#page-header {
+  opacity: 1
+}
+.justified-gallery img{
+  opacity: 1
+}
+</style></noscript><link rel="stylesheet" href="APlayer.min.css"><div id="aplayer"></div><script src="https://cdn.jsdelivr.net/gh/radium-bit/res@master/live2d/autoload.js" async></script><script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js" async></script><meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="L66" type="application/atom+xml">
+</head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/2.jpg" onerror="onerror=null;src='/img/2.jpg'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">39</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">28</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 列表</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> Music</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> Photo</span></a></li></ul></div></div></div></div><i class="fa fa-arrow-right on" id="toggle-sidebar" aria-hidden="true">     </i><div id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#RabbitMQ-消息中间件-消息队列"><span class="toc-number">1.</span> <span class="toc-text">RabbitMQ 消息中间件&#x2F;消息队列</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1、消息中间件"><span class="toc-number">2.</span> <span class="toc-text">1、消息中间件</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-简介"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-异步处理"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 异步处理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-1-串行方式"><span class="toc-number">2.2.1.</span> <span class="toc-text">1.2.1 串行方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-2-并行方式"><span class="toc-number">2.2.2.</span> <span class="toc-text">1.2.2 并行方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-3-消息队列"><span class="toc-number">2.2.3.</span> <span class="toc-text">1.2.3 消息队列</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2、作用"><span class="toc-number">2.3.</span> <span class="toc-text">2、作用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-消息中间件主要作用"><span class="toc-number">2.3.1.</span> <span class="toc-text">2.1 消息中间件主要作用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3、消息中间件的两种模式"><span class="toc-number">2.4.</span> <span class="toc-text">3、消息中间件的两种模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1、P2P模式-Rabbitmq"><span class="toc-number">2.4.1.</span> <span class="toc-text">1、P2P模式  Rabbitmq</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2、Pub-Sub模式（发布-订阅：Topic，可以重复消费）"><span class="toc-number">2.4.2.</span> <span class="toc-text">2、Pub&#x2F;Sub模式（发布&#x2F;订阅：Topic，可以重复消费）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4、常用中间件介绍与对比"><span class="toc-number">2.5.</span> <span class="toc-text">4、常用中间件介绍与对比</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1、Kafka"><span class="toc-number">2.5.1.</span> <span class="toc-text">1、Kafka</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2、RabbitMQ"><span class="toc-number">2.5.2.</span> <span class="toc-text">2、RabbitMQ</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3、RocketMQ"><span class="toc-number">2.5.3.</span> <span class="toc-text">3、RocketMQ</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2、RabbitMQ集群"><span class="toc-number">3.</span> <span class="toc-text">2、RabbitMQ集群</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1、RabbitMQ简介"><span class="toc-number">3.0.1.</span> <span class="toc-text">1、RabbitMQ简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2、RabbitMQ-特点"><span class="toc-number">3.0.2.</span> <span class="toc-text">2、RabbitMQ 特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3、RabbitMQ模式"><span class="toc-number">3.0.3.</span> <span class="toc-text">3、RabbitMQ模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4、了解集群中的基本概念："><span class="toc-number">3.0.4.</span> <span class="toc-text">4、了解集群中的基本概念：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5、普通集群准备环境"><span class="toc-number">3.0.5.</span> <span class="toc-text">5、普通集群准备环境</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6、开始部署集群三台机器都操作"><span class="toc-number">3.0.6.</span> <span class="toc-text">6、开始部署集群三台机器都操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7、RabbitMQ镜像集群配置"><span class="toc-number">3.0.7.</span> <span class="toc-text">7、RabbitMQ镜像集群配置</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3、RabbitMQ面试题"><span class="toc-number">4.</span> <span class="toc-text">3、RabbitMQ面试题</span></a></li></ol></div></div></div><div id="body-wrap"><div class="post-bg" id="nav" style="background-image: url(https://l66stbz.github.io/2024/08/16/RabbitMQ消息队列/1.png)"><div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">L66</a></span><span class="pull_right menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 列表</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> Music</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> Photo</span></a></li></ul></div></div><span class="toggle-menu close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span></span></div><div id="post-info"><div id="post-title"><div class="posttitle">RabbitMQ消息队列</div></div><div id="post-meta"><div class="meta-firstline"><time class="post-meta__date"><span class="post-meta__date-created" title="发表于 2024-08-16 22:50:00"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2024-08-16</span><span class="post-meta__separator">|</span><span class="post-meta__date-updated" title="更新于 2024-08-17 15:58:37"><i class="fa fa-history" aria-hidden="true"></i> 更新于 2024-08-17</span></time></div><div class="meta-secondline"> </div><div class="meta-thirdline"><span class="post-meta-pv-cv"><i class="fa fa-eye post-meta__icon" aria-hidden="true"> </i><span>阅读量:</span><span id="busuanzi_value_page_pv"></span></span><span class="post-meta-commentcount"></span></div></div></div></div><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><h1 id="RabbitMQ-消息中间件-消息队列"><a href="#RabbitMQ-消息中间件-消息队列" class="headerlink" title="RabbitMQ 消息中间件/消息队列"></a>RabbitMQ 消息中间件/消息队列</h1><p>[TOC]</p>
+<h1 id="1、消息中间件"><a href="#1、消息中间件" class="headerlink" title="1、消息中间件"></a>1、消息中间件</h1><h2 id="1-1-简介"><a href="#1-1-简介" class="headerlink" title="1.1 简介"></a>1.1 简介</h2><p>消息队列（Message Queue，简称 MQ）是一种用于跨进程或跨系统的异步通信机制。它允许不同的服务、应用程序或进程之间传递消息，从而实现解耦和高效的任务处理。消息队列通常用于异步处理、分布式系统、负载均衡等场景。</p>
+<p><strong>消息传递</strong>指的是程序之间通过在消息中发送数据进行通信。</p>
+<p>当下主流的消息中间件有RabbitMQ、Kafka、ActiveMQ、RocketMQ等</p>
+<h2 id="1-2-异步处理"><a href="#1-2-异步处理" class="headerlink" title="1.2 异步处理"></a>1.2 异步处理</h2><p>​    场景说明：用户注册账号以后，需要发送注册成功邮件和注册成功短信，传统的做法有两种：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1.串行的方式；</span><br><span class="line">2.并行的方式；</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-1-串行方式"><a href="#1-2-1-串行方式" class="headerlink" title="1.2.1 串行方式"></a>1.2.1 串行方式</h3><p>​        将注册信息写入数据库后，发送注册邮件，再发送注册短信，以上三个任务全部完成后才返回给客户端。这有一个问题是，邮件，短信并不是必须的，它只是一个通知，而这种做法让客户端等待没有必要等待的东西。</p>
+<p><img src="https://hjmimage.oss-cn-zhangjiakou.aliyuncs.com/202405141546699.png" alt="串行方式"></p>
+<h3 id="1-2-2-并行方式"><a href="#1-2-2-并行方式" class="headerlink" title="1.2.2 并行方式"></a>1.2.2 并行方式</h3><p>​        将注册信息写入数据库后，发送邮件的同时，发送短信，以上三个任务完成后，返回给客户端，并行的方式能提高处理的时间。</p>
+<p><img src="https://hjmimage.oss-cn-zhangjiakou.aliyuncs.com/202405141547675.png" alt="并行方式"></p>
+<p>假设三个业务节点分别使用50ms，串行方式使用时间150ms，并行使用时间100ms。虽然并性已经提高的处理时间，但是，前面说过邮件和短信对我正常的使用网站没有任何影响，客户端没有必要等着其发送完成才显示注册成功，应该是写入数据库后就返回。</p>
+<h3 id="1-2-3-消息队列"><a href="#1-2-3-消息队列" class="headerlink" title="1.2.3 消息队列"></a>1.2.3 消息队列</h3><p>​        引入消息队列后，把发送邮件，短信不是必须的业务逻辑异步处理。</p>
+<p><img src="https://hjmimage.oss-cn-zhangjiakou.aliyuncs.com/202405251531955.png" alt="在这里插入图片描述"></p>
+<p>由此可以看出，引入消息队列后，用户的响应时间就等于写入数据库的时间+写入消息队列的时间(可以忽略不计)，引入消息队列后处理后，响应时间是串行的3倍，是并行的2倍。</p>
+<h2 id="2、作用"><a href="#2、作用" class="headerlink" title="2、作用"></a>2、作用</h2><h3 id="2-1-消息中间件主要作用"><a href="#2-1-消息中间件主要作用" class="headerlink" title="2.1 消息中间件主要作用"></a>2.1 消息中间件主要作用</h3><ul>
+<li>冗余(存储)<ul>
+<li>消息持久化功能，将消息存储在可靠的介质中，确保在系统故障或崩溃时，消息不会丢失。</li>
+</ul>
+</li>
+<li>扩展性<ul>
+<li>消息中间件支持系统的水平扩展。通过添加更多的生产者（Producers）和消费者（Consumers），可以处理更大规模的数据量和流量。</li>
+</ul>
+</li>
+<li>可恢复性<ul>
+<li>具有内建的故障恢复机制，能够在系统组件出现故障时进行恢复。例如，当某个消费者崩溃后重新启动时，它可以从上次处理的消息位置继续处理未完成的消息，从而实现故障恢复。</li>
+</ul>
+</li>
+<li>缓冲<ul>
+<li>在生产者和消费者之间提供缓冲作用。生产者可以以自己的速度发送消息，而消费者可以以自己的速度处理消息，这种缓冲机制帮助平滑突发的流量高峰，防止系统过载。</li>
+</ul>
+</li>
+<li>异步通信<ul>
+<li>允许系统之间进行异步通信，生产者发送消息后不需要等待消费者处理完毕，这样可以提高系统的并发性和响应速度。异步通信模式下，生产者和消费者可以独立地进行处理，提升整体系统的效率。</li>
+</ul>
+</li>
+<li>削峰  <ul>
+<li>消息队列中的常用场景，一般在秒杀或抢购活动中使用广泛。一般会因为流量过大，应用系统配置承载不了这股瞬间流量，导致系统直接挂掉，即传说中的“宕机”现象。为解决这个问题，我们会将那股巨大的流量拒在系统的上层，即将其转移至 MQ 而不直接涌入我们的接口。</li>
+</ul>
+</li>
+<li>解耦（耦合性）<ul>
+<li>降低应用与应用间的耦合性</li>
+</ul>
+</li>
+</ul>
+<h2 id="3、消息中间件的两种模式"><a href="#3、消息中间件的两种模式" class="headerlink" title="3、消息中间件的两种模式"></a>3、消息中间件的两种模式</h2><h3 id="1、P2P模式-Rabbitmq"><a href="#1、P2P模式-Rabbitmq" class="headerlink" title="1、P2P模式  Rabbitmq"></a>1、P2P模式  Rabbitmq</h3><p>P2P模式包含三个角色：消息队列（Queue）、发送者(Sender)、接收者(Receiver)。每个消息都被发送到一个特定的队列，接收者从队列中获取消息。队列保留着消息，直到它们被消费或超时。</p>
+<p><strong>P2P的特点：</strong>（点对点：Queue，不可重复消费）</p>
+<ul>
+<li>每个消息只有一个消费者（Consumer），即一旦被消费，消息就不再在消息队列中存在</li>
+<li>发送者和接收者之间在时间上没有依赖性，也就是说当发送者发送了消息之后，不管接收者有没有正在运行它不会影响到消息被发送到队列</li>
+<li>接收者在成功接收消息之后需向队列应答成功</li>
+<li>如果希望发送的每个消息都会被成功处理的话，那么需要P2P模式</li>
+</ul>
+<h3 id="2、Pub-Sub模式（发布-订阅：Topic，可以重复消费）"><a href="#2、Pub-Sub模式（发布-订阅：Topic，可以重复消费）" class="headerlink" title="2、Pub/Sub模式（发布/订阅：Topic，可以重复消费）"></a>2、Pub/Sub模式（发布/订阅：Topic，可以重复消费）</h3><p>Pub/Sub模式包含三个角色：主题（Topic）、发布者（Publisher）、订阅者（Subscriber） 。多个发布者将消息发送到Topic，系统将这些消息传递给多个订阅者。</p>
+<p><strong>Pub/Sub的特点：</strong></p>
+<ul>
+<li>每个消息可以有多个消费者</li>
+<li>发布者和订阅者之间有时间上的依赖性。针对某个主题（Topic）的订阅者，它必须创建一个订阅者之后，才能消费发布者的消息</li>
+<li>为了消费消息，订阅者必须保持运行的状态</li>
+<li>如果希望发送的消息可以不被做任何处理、或者只被一个消费者处理、或者可以被多个消费者处理的话，那么可以采用Pub/Sub模型</li>
+</ul>
+<h2 id="4、常用中间件介绍与对比"><a href="#4、常用中间件介绍与对比" class="headerlink" title="4、常用中间件介绍与对比"></a>4、常用中间件介绍与对比</h2><h3 id="1、Kafka"><a href="#1、Kafka" class="headerlink" title="1、Kafka"></a>1、Kafka</h3><p>Kafka是LinkedIn开源的分布式发布-订阅消息系统，目前归属于Apache顶级项目。Kafka主要特点是追求高吞吐量，一开始的目的就是用于日志收集和传输。0.8版本开始支持复制，<strong>不支持事务，对消息的重复、丢失、错误没有严格要求，适合产生大量日志数据的互联网服务的数据收集业务。</strong></p>
+<h3 id="2、RabbitMQ"><a href="#2、RabbitMQ" class="headerlink" title="2、RabbitMQ"></a>2、RabbitMQ</h3><p>RabbitMQ是使用Erlang语言开发的开源消息队列系统，<strong>基于AMQP协议来实现。AMQP的主要特征是异步通信、面向消息、队列、路由（包括点对点和发布/订阅）、可靠性、安全。AMQP协议更多用在企业系统内对数据一致性、稳定性和可靠性要求很高的场景，对性能和吞吐量的要求还在其次。</strong></p>
+<p><code>Erlang</code>是一种通用的面向并发的编程语言</p>
+<blockquote>
+<p>AMQP（Advanced Message Queuing Protocol，高级消息队列协议）是一个开放的标准应用层协议，用于消息传递。AMQP 设计的初衷是为了实现跨平台的消息队列系统，确保不同的消息传递中间件能够互操作。</p>
+<p>主要特性</p>
+<ol>
+<li><strong>异步消息传递</strong>：AMQP 支持异步消息传递，可以在发送和接收消息时不需要同步等待。</li>
+<li><strong>跨平台互操作性</strong>：AMQP 是一个开放标准，支持不同平台和编程语言的互操作。</li>
+<li><strong>可靠性</strong>：提供消息确认、持久化、事务等机制，确保消息不会丢失。</li>
+</ol>
+</blockquote>
+<h3 id="3、RocketMQ"><a href="#3、RocketMQ" class="headerlink" title="3、RocketMQ"></a>3、RocketMQ</h3><p>RocketMQ是阿里开源的消息中间件，<strong>它是纯Java开发，具有高吞吐量、高可用性、适合大规模分布式系统应用的特点。</strong>它对消息的可靠传输及事务性做了优化，目前在阿里集团被广泛应用于交易、充值、消息推送、日志流式处理、binglog分发等场景。</p>
+<hr>
+<p>RabbitMQ比Kafka可靠，Kafka更适合IO高吞吐的处理，一般应用在大数据日志处理或对实时性（少量延迟），可靠性（少量丢数据）要求稍低的场景使用，比如ELK日志收集。</p>
+<h1 id="2、RabbitMQ集群"><a href="#2、RabbitMQ集群" class="headerlink" title="2、RabbitMQ集群"></a>2、RabbitMQ集群</h1><h3 id="1、RabbitMQ简介"><a href="#1、RabbitMQ简介" class="headerlink" title="1、RabbitMQ简介"></a><strong>1、RabbitMQ简介</strong></h3><p>RabbitMQ是Erlang开发的，集群非常方便，因为Erlang天生就是分布式语言，但其本身<strong>并不支持负载均衡，支持高并发，支持可扩展。支持AJAX，持久化，用于在分布式系统中存储转发消息，在易用性、扩展性、高可用性等方面表现不俗。</strong></p>
+<p><em>Ajax</em> 即“Asynchronous Javascript And XML”(异步 JavaScript 和 XML),是指一种创建交互式网页应用的网页开发技术。<em>Ajax</em> = 异步 JavaScript 和 XML</p>
+<h3 id="2、RabbitMQ-特点"><a href="#2、RabbitMQ-特点" class="headerlink" title="2、RabbitMQ 特点"></a>2、RabbitMQ 特点</h3><ul>
+<li><strong>可靠性</strong><ul>
+<li><code>持久化</code>：消息可以持久化到磁盘，确保在服务器重启后仍然可以恢复消息。</li>
+<li>确认机制：生产者和消费者可以收到消息传递和处理的确认，确保消息不会丢失。</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p><strong>扩展性</strong></p>
+<ul>
+<li><code>集群</code>：RabbitMQ 可以配置为集群模式，多个节点共同工作，分担消息负载。</li>
+<li>分区交换：消息可以根据规则分发到不同的队列，实现负载均衡。</li>
+</ul>
+</li>
+<li><p><strong>高可用性</strong></p>
+<ul>
+<li><code>镜像队列</code>：队列可以配置为镜像队列，消息会在多个节点之间复制，确保其中一个节点故障时消息不会丢失。</li>
+<li><code>自动故障转移</code>：在集群模式下，RabbitMQ 可以自动进行故障转移，保持系统的高可用性。</li>
+</ul>
+</li>
+<li><p><strong>多语言客户端</strong></p>
+<ul>
+<li>Java：通过 Spring AMQP、RabbitMQ Java Client 等库进行集成。</li>
+<li>其他语言：如 .NET、JavaScript、Go、PHP 等都有对应的客户端库。</li>
+</ul>
+</li>
+<li><p><strong>Web管理界面</strong></p>
+<ul>
+<li>提供了一个功能强大的 Web 管理界面，便于管理和监控</li>
+</ul>
+</li>
+<li><p><strong>插件机制</strong></p>
+<ul>
+<li>通过简单的命令可以安装和启用插件。<ul>
+<li>Management Plugin：提供 Web 管理界面。</li>
+<li>其他插件：如延迟队列插件、安全认证插件等。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="3、RabbitMQ模式"><a href="#3、RabbitMQ模式" class="headerlink" title="3、RabbitMQ模式"></a>3、RabbitMQ模式</h3><p><strong>注意:RabbitMQ模式大概分为以下三种:</strong></p>
+<p>(1)单机模式。</p>
+<p>(2)普通模式(默认的集群模式)。</p>
+<p>(3)<code>镜像模式</code>(把需要的队列做成镜像队列，存在于多个节点，属于RabbiMQ的HA方案，在对业务可靠性要求较高的场合中比较适合)。要实现镜像模式，需要先搭建出普通集群模式，在这个模式的基础上再配置镜像模式以实现高可用。</p>
+<h3 id="4、了解集群中的基本概念："><a href="#4、了解集群中的基本概念：" class="headerlink" title="4、了解集群中的基本概念："></a><strong>4、了解集群中的基本概念：</strong></h3><p>RabbitMQ的集群节点包括<code>内存节点</code>、<code>磁盘节点</code>。顾名思义内存节点就是将所有数据放在内存，磁盘节点将数据放在磁盘。</p>
+<p>一个rabbitmq集群中可以共享 user，vhost，queue，exchange等，所有的数据和状态都是必须在所有节点上复制。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">Broker:</span><br><span class="line"><span class="meta">	#</span><span class="bash"> RabbitMQ 服务器本身就是一个消息代理（Broker）。它负责接收、存储和转发消息到合适的目的地。</span></span><br><span class="line">	</span><br><span class="line">ConnectionFactory（连接管理器）：</span><br><span class="line"><span class="meta">	#</span><span class="bash"> 应用程序与Rabbit之间建立连接的管理器，程序代码中使用；如主机名、端口、用户名、密码等。</span></span><br><span class="line">		</span><br><span class="line">Exchange（交换器）：</span><br><span class="line"><span class="meta">	#</span><span class="bash"> 交换器（Exchange）是消息路由的核心组件。生产者发送的消息不会直接传递到队列，而是先发送到交换器，然后由交换器根据特定的规则将消息路由到一个或多个队列中。</span></span><br><span class="line"></span><br><span class="line">Routing Key：</span><br><span class="line"><span class="meta">	#</span><span class="bash"> 一个用于路由消息的字符串。当生产者发送消息到交换机(Exchange)时，会指定一个路由键。交换机会根据这个键和绑定规则将消息分发到相应的队列。</span></span><br><span class="line">	</span><br><span class="line">Queue（队列）：</span><br><span class="line"><span class="meta">	#</span><span class="bash"> 存储消息的地方，消费者从队列中获取并处理消息。队列可以配置为持久化，以确保消息在服务器重启后仍然存在。</span></span><br><span class="line">	</span><br><span class="line">Bindding（绑定）：</span><br><span class="line"><span class="meta">	#</span><span class="bash"> 将交换机和队列连接起来，定义了交换机如何根据路由键将消息路由到队列。</span></span><br><span class="line">	</span><br><span class="line">vhost（虚拟主机）：</span><br><span class="line"><span class="meta">	#</span><span class="bash"> 用于多租户和权限分离的机制。一个 Broker 可以有多个 Vhost，每个 Vhost 可以有独立的交换机、队列、绑定和权限配置。这样可以隔离不同的应用或租户的数据和配置。</span></span><br><span class="line"></span><br><span class="line">producer（生产者）：</span><br><span class="line"><span class="meta">	#</span><span class="bash"> 生产者是创建并发送消息到 RabbitMQ 的应用程序或服务。生产者将消息发送到交换机，并指定一个路由键。</span></span><br><span class="line">	</span><br><span class="line">consumer（消费者）：</span><br><span class="line"><span class="meta">	#</span><span class="bash"> 消费者是从 RabbitMQ 队列中接收并处理消息的应用程序或服务。消费者可以订阅一个或多个队列，并根据需要处理消息。</span></span><br><span class="line">	</span><br><span class="line">channel（信道）：</span><br><span class="line"><span class="meta">	#</span><span class="bash"> 消息通道，在客户端的每个连接里，可建立多个channel，每个channel代表一个会话任务。消息推送使用的通道。</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://youngfitfei.oss-cn-beijing.aliyuncs.com/img/1571320020040.png" alt="1571320020040"></p>
+<ol>
+<li><strong>生产者发送消息</strong>：</li>
+</ol>
+<ul>
+<li>生产者创建消息，并将其发送到 RabbitMQ 的某个交换机中。消息可以携带路由键，交换机会根据这个键和绑定规则将消息路由到相应的队列。</li>
+</ul>
+<ol start="2">
+<li><strong>交换机路由消息</strong>：</li>
+</ol>
+<ul>
+<li>交换机接收消息后，根据类型和绑定规则将消息路由到一个或多个队列中。如果没有找到匹配的队列，交换机会丢弃消息，或者根据配置返回给生产者。</li>
+</ul>
+<ol start="3">
+<li><strong>消息进入队列</strong>：</li>
+</ol>
+<ul>
+<li>一旦消息被路由到队列中，消息就会暂时存储在队列中，等待消费者处理。队列可以配置为持久化，以确保即使 RabbitMQ 服务崩溃，消息也不会丢失。</li>
+</ul>
+<ol start="4">
+<li><strong>消费者接收消息</strong>：</li>
+</ol>
+<ul>
+<li>消费者从队列中取走消息并进行处理。消息的分发可以通过轮询（Round Robin）分配给多个消费者，或者消费者可以从多个队列中获取消息进行处理。</li>
+</ul>
+<ol start="5">
+<li><strong>消息确认</strong>：</li>
+</ol>
+<ul>
+<li>消费者处理完消息后，会向 RabbitMQ 发送一个确认消息（ACK），告知消息已被成功处理。如果消费者在处理过程中失败，RabbitMQ 可以重新将消息投递给其他消费者或重新进入队列，这取决于队列的配置。</li>
+</ul>
+<p><strong>面试注意:集群中有两种节点</strong></p>
+<ul>
+<li><p><code>内存节点</code>：只保存状态到内存（持久的queue的持久内容将被保存到磁盘中）</p>
+</li>
+<li><p><code>磁盘节点</code>：保存状态到内存和磁盘。—推荐</p>
+</li>
+</ul>
+<p>内存节点虽然不写入磁盘，但是它执行比磁盘节点要高。集群中，只需要一个磁盘节点来保存状态 就足够了。如果集群中<code>只有内存节点</code>，那么<code>不能停止</code>它们，否则所有的状态，消息等都会丢失。</p>
+<h3 id="5、普通集群准备环境"><a href="#5、普通集群准备环境" class="headerlink" title="5、普通集群准备环境"></a>5、普通集群准备环境</h3><p>Rabbitmq官方最新rpm包下载地址：<a href="https://www.rabbitmq.com/install-rpm.html#downloads" target="_blank" rel="noopener">https://www.rabbitmq.com/install-rpm.html#downloads</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># rabbitmq 和 erlang兼容版本</span><br><span class="line">https:&#x2F;&#x2F;www.rabbitmq.com&#x2F;which-erlang.html</span><br><span class="line"># erlang 版本选择</span><br><span class="line">https:&#x2F;&#x2F;packagecloud.io&#x2F;rabbitmq&#x2F;erlang</span><br><span class="line"># rabbitmq 版本选择</span><br><span class="line">https:&#x2F;&#x2F;www.rabbitmq.com&#x2F;news.html</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>三台机器都操作:</strong></p>
+<ol>
+<li><p>配置hosts文件；更改三台MQ节点的<code>主机名</code>分别为rabbitmq-1、rabbitmq-2 和rabbitmq-3，然后修改hosts配置件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 三台主机修改主机名</span></span><br><span class="line">[root@rabbitmq-1 ~]# hostnamectl set-hostname rabbitmq-1</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 三台主机本地解析</span></span><br><span class="line">[root@rabbitmq-1 ~]# vim /etc/hosts</span><br><span class="line">127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4</span><br><span class="line">::1         localhost localhost.localdomain localhost6 localhost6.localdomain6</span><br><span class="line">192.168.50.138 rabbitmq-1</span><br><span class="line">192.168.50.139 rabbitmq-2</span><br><span class="line">192.168.50.140 rabbitmq-3</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>三个节点配置安装rabbitmq软件</p>
+</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 安装依赖</span></span><br><span class="line">[root@rabbitmq-1 ~]# yum install -y *epel* gcc-c++ unixODBC unixODBC-devel openssl-devel ncurses-devel</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> yum安装erlang</span></span><br><span class="line">[root@rabbitmq-1 ~]# wget --content-disposition https://packagecloud.io/rabbitmq/erlang/packages/el/7/erlang-20.3-1.el7.centos.x86_64.rpm/download.rpm</span><br><span class="line">[root@rabbitmq-1 ~]# yum install erlang-20.3-1.el7.centos.x86_64.rpm -y</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 测试erlang</span></span><br><span class="line">[root@rabbitmq-1 ~]# erl	</span><br><span class="line">Erlang/OTP 20 [erts-9.3] [source] [64-bit] [smp:1:1] [ds:1:1:10] [async-threads:10] [hipe] [kernel-poll:false]</span><br><span class="line"></span><br><span class="line">Eshell V9.3  (abort with ^G)</span><br><span class="line"><span class="meta">1&gt;</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 两次Crtl+c退出</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 安装rabbitmq</span></span><br><span class="line">[root@rabbitmq-1 ~]# wget https://dl.bintray.com/rabbitmq/all/rabbitmq-server/3.7.5/rabbitmq-server-3.7.5-1.el7.noarch.rpm</span><br><span class="line">[root@rabbitmq-1 ~]# yum install rabbitmq-server-3.7.5-1.el7.noarch.rpm -y</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 启动</span></span><br><span class="line">[root@rabbitmq-1 ~]# systemctl daemon-reload</span><br><span class="line">[root@rabbitmq-1 ~]# systemctl enable --now rabbitmq-server</span><br><span class="line">[root@rabbitmq-1 ~]# systemctl status rabbitmq-server</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 每台都操作开启rabbitmq的web访问界面： </span></span><br><span class="line">[root@rabbitmq-1 ~]# rabbitmq-plugins enable rabbitmq_management</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://youngfitfei.oss-cn-beijing.aliyuncs.com/img/1585804728482.png" alt="1585804728482"></p>
+<blockquote>
+<p>默认：RabbitMQ web界面关闭</p>
+</blockquote>
+<p>创建用户</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">注意:在一台机器操作</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 添加用户和密码</span></span><br><span class="line">[root@rabbitmq-1 ~]# rabbitmqctl add_user soho soso</span><br><span class="line">Adding user "soho" ...</span><br><span class="line"><span class="meta">	#</span><span class="bash"> soho：用户名</span></span><br><span class="line"><span class="meta">	#</span><span class="bash"> soso：密码</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 设置为管理员</span></span><br><span class="line">[root@rabbitmq-1 ~]# rabbitmqctl set_user_tags soho administrator</span><br><span class="line">Setting tags for user "soho" to [administrator] ...</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看所有用户</span></span><br><span class="line">[root@rabbitmq-1 ~]# rabbitmqctl list_users</span><br><span class="line">Listing users ...</span><br><span class="line">guest	[administrator]</span><br><span class="line">soho	[administrator]</span><br><span class="line">...done.</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 新建用户设置权限</span></span><br><span class="line">[root@rabbitmq-1 ~]# rabbitmqctl set_permissions -p "/" soso ".*" ".*" ".*"</span><br><span class="line">Setting permissions for user "soho" in vhost "/" ...</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>此处设置权限时注意&#39;.*&#39;之间需要有空格 三个&#39;.*&#39;分别代表了加载conf权限，read权限与write权限 例如：当没有给soho设置这三个权限前是没有权限查询队列，在ui界面也看不见</code></p>
+</blockquote>
+<ol start="3">
+<li>三台机器都操作:开启用户远程登录:</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 切换目录</span></span><br><span class="line">[root@rabbitmq-1 ~]# cd /etc/rabbitmq/   </span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 拷贝默认配置文件至工作目录</span></span><br><span class="line">[root@rabbitmq-1 rabbitmq]# cp /usr/share/doc/rabbitmq-server-3.7.5/rabbitmq.config.example /etc/rabbitmq/rabbitmq.config</span><br><span class="line"></span><br><span class="line">[root@rabbitmq-1 rabbitmq]# ls</span><br><span class="line">enabled_plugins  rabbitmq.config</span><br><span class="line"></span><br><span class="line">[root@rabbitmq-1 rabbitmq]# vim rabbitmq.config</span><br><span class="line"><span class="meta">	#</span><span class="bash"> 修改如下:</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://youngfitfei.oss-cn-beijing.aliyuncs.com/img/1564157816348.png" alt="1564157816348"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 三台机器都操作重启服务服务:</span></span><br><span class="line">[root@rabbitmq-1 ~]# systemctl restart rabbitmq-server</span><br></pre></td></tr></table></figure>
+
+<p><strong>查看端口</strong></p>
+<p><img src="https://youngfitfei.oss-cn-beijing.aliyuncs.com/img/1564157344617.png" alt="1564157344617"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">4369 -- erlang端口</span><br><span class="line">5672 --程序连接端口</span><br><span class="line">15672 -- 管理界面ui端口</span><br><span class="line">25672 -- server间内部通信端口</span><br></pre></td></tr></table></figure>
+
+<p><strong>！注意如果是云服务器，切记添加安全组端口放行。</strong></p>
+<p>访问:192.168.50.138:15672</p>
+<p><img src="https://youngfitfei.oss-cn-beijing.aliyuncs.com/img/1564157664109.png" alt="1564157664109"></p>
+<p><img src="https://youngfitfei.oss-cn-beijing.aliyuncs.com/img/1564158056319.png" alt="1564158056319"></p>
+<p><strong>这里需要注意:</strong></p>
+<p>rabbitmq默认管理员用户:guest   密码:guest</p>
+<p>新添加的用户为:soho 密码:soso</p>
+<h3 id="6、开始部署集群三台机器都操作"><a href="#6、开始部署集群三台机器都操作" class="headerlink" title="6、开始部署集群三台机器都操作"></a><strong>6、开始部署集群三台机器都操作</strong></h3><p>1.首先创建好数据存放目录和日志存放目录:</p>
+<p>3台机器都操作:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 创建RabbitMQ数据存放处</span></span><br><span class="line">[root@rabbitmq-1 ~]# mkdir -p /data/rabbitmq/data</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 创建RabbitMQ日志文件存放处</span></span><br><span class="line">[root@rabbitmq-1 ~]# mkdir -p /data/rabbitmq/logs</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 修改权限和属主、属组</span></span><br><span class="line">[root@rabbitmq-1 ~]# chmod 777 -R /data/rabbitmq</span><br><span class="line">[root@rabbitmq-1 ~]# chown rabbitmq.rabbitmq /data/ -R</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 创建配置文件:</span></span><br><span class="line">[root@rabbitmq-1 ~]# vim /etc/rabbitmq/rabbitmq-env.conf</span><br><span class="line">RABBITMQ_MNESIA_BASE=/data/rabbitmq/data</span><br><span class="line">RABBITMQ_LOG_BASE=/data/rabbitmq/logs</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 重启服务</span></span><br><span class="line">[root@rabbitmq-1 ~]# systemctl restart rabbitmq-server</span><br></pre></td></tr></table></figure>
+
+<p><strong>2.拷erlang.cookie</strong></p>
+<p>Rabbitmq的集群是依附于erlang的集群来工作的,所以必须先构建起erlang的集群。Erlang的集群中各节点是经由各个cookie来实现的,这个cookie存放在<code>/var/lib/rabbitmq/.erlang.cookie</code>中，文件是400的权限。所以<code>必须保证各节点cookie一致</code>,不然节点之间就<code>无法通信</code>。</p>
+<p>如果执行# rabbitmqctl stop_app 这条命令报错:需要执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">如果执行<span class="comment"># rabbitmqctl stop_app 这条命令报错:需要执行</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash">chmod 400 .erlang.cookie</span></span><br><span class="line"><span class="meta">#</span><span class="bash">chown rabbitmq.rabbitmq .erlang.cookie</span></span><br></pre></td></tr></table></figure>
+
+<p>(官方在介绍集群的文档中提到过.erlang.cookie 一般会存在这两个地址：第一个是home/.erlang.cookie；第二个地方就是/var/lib/rabbitmq/.erlang.cookie。如果我们使用解压缩方式安装部署的rabbitmq，那么这个文件会在{home}目录下，也就是$home/.erlang.cookie。如果我们使用rpm等安装包方式进行安装的，那么这个文件会在/var/lib/rabbitmq目录下。)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查看Cookie值</span></span><br><span class="line">[root@rabbitmq-1 ~]# cat /var/lib/rabbitmq/.erlang.cookie</span><br><span class="line">HOUCUGJDZYTFZDSWXTHJ</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> scp的方式将rabbitmq-1节点的.erlang.cookie的值复制到其他两个节点中。</span></span><br><span class="line">[root@rabbitmq-1 ~]# scp /var/lib/rabbitmq/.erlang.cookie root@192.168.50.139:/var/lib/rabbitmq/</span><br><span class="line">[root@rabbitmq-1 ~]# scp /var/lib/rabbitmq/.erlang.cookie root@192.168.50.140:/var/lib/rabbitmq/</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>.erlang.cookie</code> 文件是 Erlang 运行时系统用于节点之间的认证文件。在搭建 RabbitMQ 集群时，确保了集群中的各个节点可以相互通信和信任。每个节点在启动时都会检查 .erlang.cookie 文件的内容，只有拥有相同 cookie 值的节点才能成功地建立连接并进行通信。</p>
+</blockquote>
+<p><strong>3.将mq-2、mq-3作为内存节点加到mq-1节点集群中</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">在mq-2、mq-3执行如下命令： 停止节点，切记不是停止服务</span></span><br><span class="line">[root@rabbitmq-2 ~]# rabbitmqctl stop_app</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://youngfitfei.oss-cn-beijing.aliyuncs.com/img/1585815681534.png" alt="1585815681534"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 如果有数据需要重置，没有则不用</span></span><br><span class="line">[root@rabbitmq-2 ~]# rabbitmqctl reset</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://youngfitfei.oss-cn-beijing.aliyuncs.com/img/1585815744200.png" alt="1585815744200"></p>
+<p><code>注意查看回显，如果不是以上。就是错误；如果报错，重启rabbitmq服务</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 将两个节点加入集群，指定角色，添加到内存节点</span></span><br><span class="line">[root@rabbitmq-2 ~]# rabbitmqctl join_cluster --ram rabbit@rabbitmq-1  </span><br><span class="line">Clustering node 'rabbit@rabbitmq-2' with 'rabbit@rabbitmq-1' ...</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 启动节点</span></span><br><span class="line">[root@rabbitmq-2 ~]# rabbitmqctl start_app  </span><br><span class="line">Starting node 'rabbit@rabbitmq-2' ...</span><br><span class="line"> completed with 3 plugins.</span><br><span class="line">===============================================================================</span><br><span class="line"></span><br><span class="line">[root@rabbitmq-3 ~]# rabbitmqctl stop_app</span><br><span class="line">Stopping node 'rabbit@rabbitmq-3' ...</span><br><span class="line">[root@rabbitmq-3 ~]# rabbitmqctl reset</span><br><span class="line">Resetting node 'rabbit@rabbitmq-3' ...</span><br><span class="line">[root@rabbitmq-3 ~]# rabbitmqctl join_cluster --ram rabbit@rabbitmq-1</span><br><span class="line">Clustering node 'rabbit@rabbitmq-3' with 'rabbit@rabbitmq-1' ...</span><br><span class="line">[root@rabbitmq-3 ~]# rabbitmqctl start_app</span><br><span class="line">Starting node 'rabbit@rabbitmq-3' ...</span><br><span class="line"> completed with 3 plugins.</span><br><span class="line"></span><br><span class="line">（1）默认rabbitmq启动后是磁盘节点，在这个cluster命令下，mq-2和mq-3是内存节点，</span><br><span class="line">mq-1是磁盘节点。</span><br><span class="line">（2）如果要使mq-2、mq-3都是磁盘节点，去掉--ram参数即可。</span><br><span class="line">（3）如果想要更改节点类型，可以使用命令rabbitmqctl change_cluster_node_type</span><br><span class="line">disc(ram),前提是必须停掉rabbitmq基础应用erlang</span><br><span class="line">注:</span><br><span class="line"><span class="meta">#</span><span class="bash">如果有需要使用磁盘节点加入集群</span></span><br><span class="line"> [root@rabbitmq-2 ~]# rabbitmqctl join_cluster  rabbit@rabbitmq-1</span><br><span class="line"> [root@rabbitmq-3 ~]# rabbitmqctl join_cluster  rabbit@rabbitmq-1</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>4.查看集群状态</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">在RabbitMQ集群任意节点上执行 rabbitmqctl cluster_status来查看是否集群配置成功。在mq-1磁盘节点上面查看</span></span><br><span class="line">[root@rabbitmq-1 ~]# rabbitmqctl cluster_status</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://youngfitfei.oss-cn-beijing.aliyuncs.com/img/1564158874154.png" alt="1564158874154"></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">每台机器显示出三台节点，表示已经添加成功！</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>5.登录rabbitmq web管理控制台，创建新的队列</strong></p>
+<p>打开浏览器输入<a href="http://192.168.50.138:15672" target="_blank" rel="noopener">http://192.168.50.138:15672</a>, </p>
+<p>输入默认的<code>Username：guest</code>；输入默认的<code>Password:guest</code></p>
+<p>此时会发现之间创建的用户登录不了，这是因为我们修改了rabbitmq的数据目录，导致之前创建的用户消失了。</p>
+<p>登录后出现如图所示的界面。</p>
+<p><img src="https://youngfitfei.oss-cn-beijing.aliyuncs.com/img/1564162424739.png" alt="1564162424739"></p>
+<p>根据界面提示创建一条队列</p>
+<p><img src="https://youngfitfei.oss-cn-beijing.aliyuncs.com/img/1564159056655.png" alt="1564159056655"></p>
+<p><img src="https://youngfitfei.oss-cn-beijing.aliyuncs.com/img/1564159160374.png" alt="1564159160374"></p>
+<h3 id="7、RabbitMQ镜像集群配置"><a href="#7、RabbitMQ镜像集群配置" class="headerlink" title="7、RabbitMQ镜像集群配置"></a>7、RabbitMQ镜像集群配置</h3><p>  上面已经完成RabbitMQ默认集群模式，<strong>但并不保证队列的<code>高可用性</code>，队列内容不会复制。如果队列节点宕机直接导致该队列无法应用，只能等待重启，所以要想在队列节点宕机或故障也能正常应用，就要复制队列内容到集群里的每个节点，必须要创建镜像队列。</strong></p>
+<p><code>镜像队列是基于普通的集群模式的。</code></p>
+<p><strong>创建镜像集群:在任意一台机器操作</strong></p>
+<p>rabbitmq set_policy ：设置策略</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@rabbitmq-1 ~]# rabbitmqctl set_policy  ha-all "^" '&#123;"ha-mode":"all"&#125;'</span><br><span class="line"><span class="meta">	#</span><span class="bash"> 命令回显</span></span><br><span class="line">Setting policy "ha-all" for pattern "^" to "&#123;"ha-mode":"all"&#125;" with priority "0" for vhost "/" ...</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p> “^”匹配所有的队列， ha-all 策略名称为ha-all, ‘{“ha-mode”:”all”}’ 策略模式为 all 即复制到所有节点，包含新增节点。</p>
+</blockquote>
+<p>再次查看队列已经同步到其他两台节点:</p>
+<p><img src="https://youngfitfei.oss-cn-beijing.aliyuncs.com/img/1564159410040.png" alt="1564159410040"></p>
+<p><strong>“^”匹配所有的队列， ha-all 策略名称为ha-all, ‘{“ha-mode”:”all”}’ 策略模式为 all 即复制到所有节点，包含新增节点。</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">设置策略介绍:</span><br><span class="line">rabbitmqctl set_policy [-p Vhost] Name Pattern Definition</span><br><span class="line">-p Vhost： 可选参数，针对指定vhost下的queue进行设置</span><br><span class="line">Name: policy的名称，可以定义</span><br><span class="line">Pattern: queue的匹配模式(正则表达式),也就是说会匹配一组。</span><br><span class="line">Definition：镜像定义，包括三个部分ha-mode, ha-params, ha-sync-mode</span><br><span class="line">    ha-mode:指明镜像队列的模式，有效值为 all/exactly/nodes</span><br><span class="line">        all：表示在集群中所有的节点上进行镜像</span><br><span class="line">        exactly：表示在指定个数的节点上进行镜像，节点的个数由ha-params指定</span><br><span class="line">        nodes：表示在指定的节点上进行镜像，节点名称通过ha-params指定</span><br><span class="line">    ha-params：ha-mode模式需要用到的参数</span><br><span class="line">    ha-sync-mode：进行队列中消息的同步方式，有效值为automatic和manual</span><br><span class="line">案例:</span><br><span class="line">例如，对队列名称以hello开头的所有队列进行镜像，并在集群的两个节点上完成镜像，policy的设置命令为： </span><br><span class="line">rabbitmqctl set_policy hello-ha “^hello)” ‘&#123;“ha-mode”:”exactly”,”ha-params”:2,”ha-sync-mode”:”automatic”&#125;’</span><br></pre></td></tr></table></figure>
+
+<p>则此时镜像队列设置成功。已经部署完成。将所有队列设置为镜像队列，即队列会被复制到各个节点，各个节点状态保持一致。</p>
+<h1 id="3、RabbitMQ面试题"><a href="#3、RabbitMQ面试题" class="headerlink" title="3、RabbitMQ面试题"></a>3、RabbitMQ面试题</h1><p>1、消息队列的作用？</p>
+<p>2、RabbitMQ有什么作用？</p>
+<ul>
+<li>消息队列<ul>
+<li>将消息从发送方（生产者）传递到接收方（消费者）。通过消息队列，生产者和消费者可以异步通信，互不干扰。</li>
+</ul>
+</li>
+<li>异步处理<ul>
+<li>通过将任务封装成消息放入队列，应用程序可以实现异步处理，从而提高响应速度和处理效率。例如，Web 应用可以快速响应用户请求，同时在后台处理耗时的任务。</li>
+</ul>
+</li>
+<li>组件解耦<ul>
+<li>通过使用消息队列，系统的不同组件（服务或应用）可以互相解耦。这样，各组件可以独立开发、部署和扩展，而不必直接依赖于其他组件的实现细节。</li>
+</ul>
+</li>
+<li>负载均衡<ul>
+<li>当有多个消费者订阅同一个队列时，RabbitMQ 可以将消息分发给这些消费者，实现负载均衡，确保每个消费者处理的工作量大致均等。</li>
+</ul>
+</li>
+<li>高可用性<ul>
+<li>RabbitMQ 支持集群模式和镜像队列，可以提供高可用性和故障恢复能力，确保在节点故障时系统依然可以正常工作。</li>
+</ul>
+</li>
+<li>灵活的路由<ul>
+<li>RabbitMQ 通过交换器（Exchange）和绑定（Binding）机制，提供灵活的消息路由功能。可以根据不同的路由键、队列绑定和交换器类型，实现复杂的消息路由规则。</li>
+</ul>
+</li>
+</ul>
+<p>3、RabbitMQ的工作模式？</p>
+<ul>
+<li>单节点模式<ul>
+<li>单节点模式是最简单的部署方式，适合小型应用或开发测试环境。</li>
+</ul>
+</li>
+<li>普通集群模式<ul>
+<li>普通集群模式包含多个 RabbitMQ 节点，节点之间可以共享消息队列，但消息本身不会被复制。</li>
+</ul>
+</li>
+<li>镜像模式<ul>
+<li>镜像模式是普通集群模式的扩展，增加了消息的高可用性。队列可以被镜像到集群中的多个节点上。</li>
+</ul>
+</li>
+</ul>
+<p>4、消息队列使用场景</p>
+<ul>
+<li>任务队列<ul>
+<li>后台任务处理（例如发送电子邮件）</li>
+</ul>
+</li>
+<li>事件通知<ul>
+<li>分布式系统中组件之间的事件通知</li>
+</ul>
+</li>
+<li>数据流处理<ul>
+<li>实时数据流的处理和分析，例如日志收集和处理</li>
+</ul>
+</li>
+<li>负载分发<ul>
+<li>将消息负载分发给多个消费者，实现负载均衡和并行处理</li>
+</ul>
+</li>
+</ul>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">L66</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://l66stbz.github.io/2024/08/16/RabbitMQ%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">https://l66stbz.github.io/2024/08/16/RabbitMQ%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://l66stbz.github.io" target="_blank">L66</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linux/">Linux</a><a class="post-meta__tags" href="/tags/Redis/">Redis</a><a class="post-meta__tags" href="/tags/Cluster/">Cluster</a></div><div class="post_share"><div class="social-share" data-image="https://l66stbz.github.io/2024/08/16/RabbitMQ消息队列/1.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"/><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-button button--primary button--animated"> <i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="post-qr-code__img" src="/img/wechat.jpg" alt="微信"/><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="post-qr-code__img" src="/img/alipay.jpg" alt="支付寶"/><div class="post-qr-code__desc">支付寶</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="next-post pull-full"><a href="/2024/08/15/Redis-Cluster%E9%9B%86%E7%BE%A4/"><img class="next_cover" src="https://l66stbz.github.io/2024/08/15/Redis-Cluster集群/1.png" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Redis-Cluster集群</div></div></a></div></nav><div class="relatedPosts"><div class="relatedPosts_headline"><i class="fa fa-fw fa-thumbs-up" aria-hidden="true"></i><span> 相关推荐</span></div><div class="relatedPosts_list"><div class="relatedPosts_item"><a href="/2024/08/15/Redis-Cluster集群/" title="Redis-Cluster集群"><img class="relatedPosts_cover" src="https://l66stbz.github.io/2024/08/15/Redis-Cluster集群/1.png"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2024-08-15</div><div class="relatedPosts_title">Redis-Cluster集群</div></div></a></div><div class="relatedPosts_item"><a href="/2024/08/14/NoSQL-Redis/" title="NoSQL-Redis"><img class="relatedPosts_cover" src="https://l66stbz.github.io/2024/08/14/NoSQL-Redis/1.png"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2024-08-14</div><div class="relatedPosts_title">NoSQL-Redis</div></div></a></div><div class="relatedPosts_item"><a href="/2024/05/16/修改root密码/" title="修改root密码"><img class="relatedPosts_cover" src="https://l66stbz.github.io/2024/05/16/修改root密码/1.jpg"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2024-05-16</div><div class="relatedPosts_title">修改root密码</div></div></a></div><div class="relatedPosts_item"><a href="/2024/08/13/LVS-NAT-Keepalived/" title="LVS-NAT-Keepalived"><img class="relatedPosts_cover" src="https://l66stbz.github.io/2024/08/13/LVS-NAT-Keepalived/1.png"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2024-08-13</div><div class="relatedPosts_title">LVS-NAT-Keepalived</div></div></a></div><div class="relatedPosts_item"><a href="/2024/07/27/Mysql高可用-MHA/" title="Mysql高可用-MHA"><img class="relatedPosts_cover" src="https://l66stbz.github.io/2024/07/27/Mysql高可用-MHA/1.png"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2024-07-27</div><div class="relatedPosts_title">Mysql高可用-MHA</div></div></a></div><div class="relatedPosts_item"><a href="/2024/08/08/Tomcat运维实战/" title="Tomcat运维实战"><img class="relatedPosts_cover" src="https://l66stbz.github.io/2024/08/08/Tomcat运维实战/1.png"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2024-08-08</div><div class="relatedPosts_title">Tomcat运维实战</div></div></a></div></div><div class="clear_both"></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By L66</div><div class="framework-info"><span>驱动 </span><a href="https://hexo.io" target="_blank" rel="noopener"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 </span><a href="https://github.com/jerryc127/hexo-theme-butterfly" target="_blank" rel="noopener"><span>Butterfly</span></a></div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><i class="fa fa-book" id="readmode" title="阅读模式"></i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换" target="_self">繁</a><i class="darkmode fa fa-moon-o" id="darkmode" title="夜间模式"></i></div><div id="rightside-config-show"><div id="rightside_config" title="设置"><i class="fa fa-cog" aria-hidden="true"></i></div><i class="fa fa-list-ul close" id="mobile-toc-button" title="目录" aria-hidden="true"></i><i class="fa fa-arrow-up" id="go-up" title="回到顶部" aria-hidden="true"></i></div></section><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@3/instantpage.min.js" type="module"></script><script src="/js/third-party/click_heart.js"></script></body></html>
