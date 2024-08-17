@@ -1,0 +1,532 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>负载均衡+keepalived | L66</title><meta name="description" content="keepalived 高可用实战[TOC] 1、Keepalived相关概念1.1 介绍​    Keepalived是一种用于实现高可用性（High Availability）的软件，主要通过VRRP（Virtual Router Redundancy Protocol）协议来实现IP地址的热备份。它可以在两台或多台服务器之间进行故障切换，确保当一台服务器出现故障时，其他服务器能够接管其服务，从"><meta name="keywords" content="Linux,LVS,Keepalived,Haproxy"><meta name="author" content="L66"><meta name="copyright" content="L66"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/3.jpg"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="dns-prefetch" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="crossorigin"/><link rel="dns-prefetch" href="https://fonts.googleapis.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="dns-prefetch" href="//busuanzi.ibruce.info"/><meta name="twitter:card" content="summary"><meta name="twitter:title" content="负载均衡+keepalived"><meta name="twitter:description" content="keepalived 高可用实战[TOC] 1、Keepalived相关概念1.1 介绍​    Keepalived是一种用于实现高可用性（High Availability）的软件，主要通过VRRP（Virtual Router Redundancy Protocol）协议来实现IP地址的热备份。它可以在两台或多台服务器之间进行故障切换，确保当一台服务器出现故障时，其他服务器能够接管其服务，从"><meta name="twitter:image" content="https://l66stbz.github.io/2024/08/12/负载均衡+keepalived/1.png"><meta property="og:type" content="article"><meta property="og:title" content="负载均衡+keepalived"><meta property="og:url" content="https://l66stbz.github.io/2024/08/12/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1+keepalived/"><meta property="og:site_name" content="L66"><meta property="og:description" content="keepalived 高可用实战[TOC] 1、Keepalived相关概念1.1 介绍​    Keepalived是一种用于实现高可用性（High Availability）的软件，主要通过VRRP（Virtual Router Redundancy Protocol）协议来实现IP地址的热备份。它可以在两台或多台服务器之间进行故障切换，确保当一台服务器出现故障时，其他服务器能够接管其服务，从"><meta property="og:image" content="https://l66stbz.github.io/2024/08/12/负载均衡+keepalived/1.png"><meta property="article:published_time" content="2024-08-12T14:50:00.000Z"><meta property="article:modified_time" content="2024-08-17T07:16:02.921Z"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>var autoChangeMode = '1'
+var t = Cookies.get("theme")
+if (autoChangeMode == '1'){
+  var isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
+  var isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
+  var isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined){
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport){
+      console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour < 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+  }
+  } else if (t == 'light') activateLightMode()
+  else activateDarkMode()
+
+} else if (autoChangeMode == '2'){
+  now = new Date();
+  hour = now.getHours();
+  isNight = hour < 6 || hour >= 18
+  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode() 
+} else {
+  if ( t == 'dark' ) activateDarkMode()
+  else if ( t == 'light') activateLightMode()
+}
+
+function activateDarkMode(){
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
+  }
+}
+function activateLightMode(){
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null){
+  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
+  }
+}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="canonical" href="https://l66stbz.github.io/2024/08/12/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1+keepalived/"><link rel="prev" title="LVS-NAT-Keepalived" href="https://l66stbz.github.io/2024/08/13/LVS-NAT-Keepalived/"><link rel="next" title="负载均衡-LVS" href="https://l66stbz.github.io/2024/08/11/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1-LVS/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://xxx/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天',
+  runtime: true,
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  baiduPush: false,
+  highlightCopy: true,
+  highlightLang: true,
+  highlightShrink: 'false',
+  isFontAwesomeV5: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+  
+}</script><script>var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isSidebar: true  
+  }</script><noscript><style>
+#page-header {
+  opacity: 1
+}
+.justified-gallery img{
+  opacity: 1
+}
+</style></noscript><link rel="stylesheet" href="APlayer.min.css"><div id="aplayer"></div><script src="https://cdn.jsdelivr.net/gh/radium-bit/res@master/live2d/autoload.js" async></script><script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js" async></script><meta name="generator" content="Hexo 4.2.1"><link rel="alternate" href="/atom.xml" title="L66" type="application/atom+xml">
+</head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/2.jpg" onerror="onerror=null;src='/img/2.jpg'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">36</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">23</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 列表</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> Music</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> Photo</span></a></li></ul></div></div></div></div><i class="fa fa-arrow-right on" id="toggle-sidebar" aria-hidden="true">     </i><div id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#keepalived-高可用实战"><span class="toc-number">1.</span> <span class="toc-text">keepalived 高可用实战</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1、Keepalived相关概念"><span class="toc-number">1.1.</span> <span class="toc-text">1、Keepalived相关概念</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-介绍"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.1 介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-keepalived工作原理"><span class="toc-number">1.1.2.</span> <span class="toc-text">1.2 keepalived工作原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-VRRP协议"><span class="toc-number">1.1.3.</span> <span class="toc-text">1.3 VRRP协议</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-keepalived-的常用模块"><span class="toc-number">1.1.4.</span> <span class="toc-text">1.4 keepalived 的常用模块</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-5-脑裂介绍"><span class="toc-number">1.1.5.</span> <span class="toc-text">1.5 脑裂介绍</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-6-脑裂的解决方法"><span class="toc-number">1.1.6.</span> <span class="toc-text">1.6 脑裂的解决方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-7-Keepalived工作流程"><span class="toc-number">1.1.7.</span> <span class="toc-text">1.7 Keepalived工作流程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2、Nginx-keepalived实现七层的负载均衡-同类服务"><span class="toc-number">1.2.</span> <span class="toc-text">2、Nginx+keepalived实现七层的负载均衡(同类服务)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3、LVS-Director-Keepalived"><span class="toc-number">1.3.</span> <span class="toc-text">3、LVS_Director + Keepalived</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#"><span class="toc-number">1.3.1.</span> <span class="toc-text"></span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Haproxy-基础"><span class="toc-number">2.</span> <span class="toc-text">Haproxy 基础</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1、Haproxy介绍"><span class="toc-number">2.1.</span> <span class="toc-text">1、Haproxy介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2、Haproxy-实现七层负载实验"><span class="toc-number">2.2.</span> <span class="toc-text">2、Haproxy 实现七层负载实验</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3、Haprxoy-Keepalived实现高可用"><span class="toc-number">2.3.</span> <span class="toc-text">3、Haprxoy+Keepalived实现高可用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4、Haproxy日志开启"><span class="toc-number">2.4.</span> <span class="toc-text">4、Haproxy日志开启</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5、Haproxy-实现四层负载均衡-了解"><span class="toc-number">2.5.</span> <span class="toc-text">5、Haproxy 实现四层负载均衡(了解)</span></a></li></ol></li></ol></div></div></div><div id="body-wrap"><div class="post-bg" id="nav" style="background-image: url(https://l66stbz.github.io/2024/08/12/负载均衡+keepalived/1.png)"><div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">L66</a></span><span class="pull_right menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page"><i class="fa-fw fa fa-list" aria-hidden="true"></i><span> 列表</span><i class="fa fa-chevron-down menus-expand" aria-hidden="true"></i></a><ul class="menus_item_child"><li><a class="site-page" href="/music/"><i class="fa-fw fa fa-music"></i><span> Music</span></a></li><li><a class="site-page" href="/movies/"><i class="fa-fw fa fa-film"></i><span> Photo</span></a></li></ul></div></div><span class="toggle-menu close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span></span></div><div id="post-info"><div id="post-title"><div class="posttitle">负载均衡+keepalived</div></div><div id="post-meta"><div class="meta-firstline"><time class="post-meta__date"><span class="post-meta__date-created" title="发表于 2024-08-12 22:50:00"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2024-08-12</span><span class="post-meta__separator">|</span><span class="post-meta__date-updated" title="更新于 2024-08-17 15:16:02"><i class="fa fa-history" aria-hidden="true"></i> 更新于 2024-08-17</span></time></div><div class="meta-secondline"> </div><div class="meta-thirdline"><span class="post-meta-pv-cv"><i class="fa fa-eye post-meta__icon" aria-hidden="true"> </i><span>阅读量:</span><span id="busuanzi_value_page_pv"></span></span><span class="post-meta-commentcount"></span></div></div></div></div><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><h1 id="keepalived-高可用实战"><a href="#keepalived-高可用实战" class="headerlink" title="keepalived 高可用实战"></a>keepalived 高可用实战</h1><p>[TOC]</p>
+<h2 id="1、Keepalived相关概念"><a href="#1、Keepalived相关概念" class="headerlink" title="1、Keepalived相关概念"></a>1、Keepalived相关概念</h2><h3 id="1-1-介绍"><a href="#1-1-介绍" class="headerlink" title="1.1 介绍"></a>1.1 介绍</h3><p>​    Keepalived是一种用于实现高可用性（High Availability）的软件，主要通过VRRP（Virtual Router Redundancy Protocol）协议来实现IP地址的热备份。它可以在两台或多台服务器之间进行故障切换，确保当一台服务器出现故障时，其他服务器能够接管其服务，从而提高系统的可用性和稳定性。</p>
+<h3 id="1-2-keepalived工作原理"><a href="#1-2-keepalived工作原理" class="headerlink" title="1.2 keepalived工作原理"></a>1.2 keepalived工作原理</h3><p>Keepalived 的核心功能是通过 VRRP（Virtual Router Redundancy Protocol，虚拟路由冗余协议）来实现主备切换和健康检查。以下是 Keepalived 的主要工作原理和流程：</p>
+<ol>
+<li><strong><code>VRRP 协议</code></strong></li>
+</ol>
+<ul>
+<li><strong>VRRP (Virtual Router Redundancy Protocol)</strong> 是一种网络协议，及<strong>虚拟路由冗余协议</strong>。主要用于在多个路由器之间提供冗余。当一台设备出现故障时，其他设备能够迅速接管其工作。</li>
+<li>在 Keepalived 中，VRRP 被用来在多台服务器之间共享一个虚拟 IP 地址（VIP）。这个 VIP 是对外提供服务的地址，客户端会通过这个地址访问服务。</li>
+</ul>
+<ol start="2">
+<li><strong>主/备角色</strong></li>
+</ol>
+<ul>
+<li><strong>主服务器 (Master)</strong>：在 Keepalived 配置中，通常会有一个主服务器负责持有 VIP。所有的客户端请求都会发送到这个 VIP 上，主服务器处理这些请求。</li>
+<li><strong>备服务器 (Backup)</strong>：备服务器是处于备用状态的服务器，它也在监听 VIP 的状态。如果主服务器出现故障（例如网络断开、服务停止等），备服务器将接管 VIP 并成为新的主服务器。</li>
+</ul>
+<ol start="3">
+<li><strong>健康检查</strong></li>
+</ol>
+<ul>
+<li>Keepalived 会定期对后端的真实服务器（Real Server）进行健康检查，检查内容可以包括 TCP 连接状态、HTTP 状态码等。</li>
+<li>如果检测到某个后端服务器不可用，Keepalived 会从负载均衡池中移除该服务器，防止继续向其发送请求。当该服务器恢复正常后，Keepalived 会自动将其重新加入负载均衡池。</li>
+</ul>
+<ol start="4">
+<li><strong>优先级与抢占</strong></li>
+</ol>
+<ul>
+<li>每个参与 VRRP 的服务器都有一个优先级，优先级最高的服务器会成为主服务器。</li>
+<li>如果当前的主服务器出现故障或优先级降低，优先级最高的备服务器将抢占成为新的主服务器，并接管 VIP。</li>
+<li>当原主服务器恢复且优先级高于当前主服务器时，可以重新抢占成为主服务器。</li>
+</ul>
+<ol start="5">
+<li><strong>VRRP 广播</strong></li>
+</ol>
+<ul>
+<li>主服务器定期向网络中的备服务器发送 VRRP 广播包，告知自己仍然是主服务器。</li>
+<li>如果备服务器在一定时间内没有收到主服务器的广播包，就会认为主服务器故障，并发起选举，确定新的主服务器。</li>
+</ul>
+<h3 id="1-3-VRRP协议"><a href="#1-3-VRRP协议" class="headerlink" title="1.3 VRRP协议"></a>1.3 VRRP协议</h3><p><strong>VRRP（Virtual Router Redundancy Protocol，虚拟路由冗余协议）</strong> 是一种网络协议，用于提高网络的可靠性和可用性。它通过在多台路由器之间共享一个虚拟 IP 地址，实现网关冗余，从而确保当主路由器故障时，备份路由器能够迅速接管，继续为网络设备提供服务。</p>
+<h3 id="1-4-keepalived-的常用模块"><a href="#1-4-keepalived-的常用模块" class="headerlink" title="1.4 keepalived 的常用模块"></a>1.4 keepalived 的常用模块</h3><ol>
+<li><strong>Core模块</strong>：这是Keepalived的核心模块，负责主进程的启动和维护，以及全局配置文件的加载和解析。它是Keepalived工作的基础，确保其他模块能够正常运行。</li>
+<li><strong>Check模块</strong>：这个模块负责健康检查，包括多种检查方式，如Layer3、Layer4和Layer7的检测，分别工作在IP/TCP协议栈的IP层、TCP层和应用层。通过这些层次的检查，Keepalived能够全面监控服务器的运行状态，并在检测到故障时进行隔离。</li>
+<li><strong>VRRP模块</strong>：实现主备路由器之间的冗余。通过 VRRP，Keepalived 可以在多个服务器之间共享一个虚拟 IP 地址（VIP），从而在主服务器故障时自动切换到备份服务器，确保高可用性。</li>
+</ol>
+<h3 id="1-5-脑裂介绍"><a href="#1-5-脑裂介绍" class="headerlink" title="1.5 脑裂介绍"></a>1.5 脑裂介绍</h3><p>​    “脑裂”是一个网络术语，指的是在高可用性集群中，由于网络通信故障或配置不当，导致两个节点同时认为自己是主节点的情况。这种情况会引起服务的中断或不稳定。Keepalived的BACKUP主机在收不到MASTER主机报文后就会切换成为master，如果是它们之间的通信线路出现问题，无法接收到彼此的组播通知，但是两个节点实际都处于正常工作状态，这时两个节点均为master强行绑定虚拟IP，就是脑裂。</p>
+<h3 id="1-6-脑裂的解决方法"><a href="#1-6-脑裂的解决方法" class="headerlink" title="1.6 脑裂的解决方法"></a>1.6 脑裂的解决方法</h3><ol>
+<li>添加更多的检测手段，比如冗余的心跳线（两块网卡做健康监测），ping对方等等。尽量减少”裂脑”发生机会。(治标不治本，只是提高了检测到的概率)；</li>
+<li>做好对裂脑的监控报警（如邮件及手机短信等或值班）.在问题发生时人为第一时间介入仲裁，降低损失；</li>
+<li>爆头，将master停掉。然后检查机器之间的防火墙。网络之间的通信；</li>
+<li>引入仲裁机制：如果集群中存在多个主备节点，可以引入仲裁机制来解决脑裂问题。仲裁机制可以由一个独立的节点或服务来判断哪个节点是主节点，从而避免两个节点同时认为自己是主节点的情况。</li>
+</ol>
+<h3 id="1-7-Keepalived工作流程"><a href="#1-7-Keepalived工作流程" class="headerlink" title="1.7 Keepalived工作流程"></a>1.7 Keepalived工作流程</h3><ol>
+<li><p><strong>启动时</strong>：所有参与 Keepalived 的服务器启动时，都会发送 VRRP 广播包。优先级最高的服务器被选为主服务器，并接管 VIP。</p>
+</li>
+<li><p><strong>正常运行时</strong>：主服务器会持续发送 VRRP 广播包，通知备服务器自己处于正常工作状态。备服务器则处于监听状态，等待主服务器故障。</p>
+</li>
+<li><p><strong>故障切换</strong>：如果主服务器故障，备服务器检测到 VRRP 广播包丢失，将发起新的主服务器选举。优先级最高的备服务器会接管 VIP，成为新的主服务器。</p>
+</li>
+<li><p><strong>恢复抢占</strong>：当原主服务器恢复且优先级高于当前主服务器时，会重新抢占 VIP，恢复为主服务器。</p>
+</li>
+</ol>
+<h2 id="2、Nginx-keepalived实现七层的负载均衡-同类服务"><a href="#2、Nginx-keepalived实现七层的负载均衡-同类服务" class="headerlink" title="2、Nginx+keepalived实现七层的负载均衡(同类服务)"></a>2、Nginx+keepalived实现七层的负载均衡(同类服务)</h2><ol>
+<li><strong>环境准备</strong></li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">192.168.174.38	ha-server</span><br><span class="line">192.168.174.39	ha-backup</span><br><span class="line">192.168.174.40	real-server01</span><br><span class="line">192.168.174.41	real-server02</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><strong>real serve配置</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 两台 real server主机关闭防火墙和selinux</span></span><br><span class="line">[root@real-server ~]# systemctl disable --now firewalld</span><br><span class="line">[root@real-server ~]# setenforce 0</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 两台 real server 安装web服务，模拟真实提供服务主机</span></span><br><span class="line">[root@real-server ~]# yum install nginx -y</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; real server01 网站界面配置</span></span><br><span class="line">[root@real-server01 ~]# echo "read server01"  &gt; /usr/share/nginx/html/index.html</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 启动nginx</span></span><br><span class="line">[root@real-server01 ~]# systemctl enable --now nginx</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 测试是否正常访问</span></span><br><span class="line">[root@real-server01 ~]# curl 192.168.174.20</span><br><span class="line">real server01</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; real server02 网站界面配置</span></span><br><span class="line">[root@real-server02 ~]# echo "read server02"  &gt; /usr/share/nginx/html/index.html</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 启动nginx</span></span><br><span class="line">[root@real-server02 ~]# systemctl enable --now nginx</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 测试是否正常访问</span></span><br><span class="line">[root@real-server02 ~]# curl 192.168.174.21</span><br><span class="line">real server02</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br></pre></td><td class="code"><pre><span class="line">						  拓扑结构</span><br><span class="line"></span><br><span class="line">					[vip: 20.20.20.20]</span><br><span class="line"></span><br><span class="line">				[LB1 Nginx]		[LB2 Nginx]</span><br><span class="line">				192.168.1.2		192.168.1.3</span><br><span class="line"></span><br><span class="line">	[index]		[milis]		 [videos]	   [images]  	  [news]</span><br><span class="line">	 1.11		 1.21		   1.31			  1.41		   1.51</span><br><span class="line">	 1.12		 1.22		   1.32			  1.42		   1.52</span><br><span class="line">	 1.13		 1.23		   1.33			  1.43		   1.53</span><br><span class="line">	 ...		 ...		    ...			  ...		    ...</span><br><span class="line">	 /web     /web/milis    /web/videos     /web/images   /web/news</span><br><span class="line">   index.html  index.html     index.html      index.html   index.html</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 两台负载均衡设备关闭防火墙selinux</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> systemctl <span class="built_in">disable</span> --now firewalld &amp;&amp; setenforce 0</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 两台负载均衡设备安装nginx作为负载均衡均衡器</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> yum install -y nginx</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; ha-master配置</span></span><br><span class="line">[root@ha-master ~]# cd /etc/nginx/conf.d</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 备份原有的nginx配置文件</span></span><br><span class="line">[root@ha-master conf.d]# mv default.conf default.conf.bak</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; master和backup配置负载均衡</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> vim upstream.conf</span></span><br><span class="line">upstream index &#123;</span><br><span class="line">        server 192.168.174.40:80;</span><br><span class="line">        server 192.168.174.41:80;</span><br><span class="line">&#125; </span><br><span class="line">server &#123;</span><br><span class="line">        listen 80;</span><br><span class="line">        server_name     localhost;</span><br><span class="line">        access_log  /var/log/nginx/host.access.log  main;</span><br><span class="line">        </span><br><span class="line">        location / &#123;</span><br><span class="line">         proxy_pass http://index;</span><br><span class="line">         proxy_redirect default;</span><br><span class="line">         proxy_set_header Host $http_host;</span><br><span class="line">         proxy_set_header X-Real-IP $remote_addr;</span><br><span class="line">         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 两台负载均衡主机测试nginx配置语法是否有问题</span></span><br><span class="line">[root@ha conf.d]# nginx -t</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 两台负载均衡主机启动nginx负载均衡服务</span></span><br><span class="line">[root@ha conf.d]#  systemctl enable --now nginx</span><br><span class="line"><span class="meta">#</span><span class="bash"> 两台负载均衡主机测试用户请求是否正常转发</span></span><br><span class="line">略</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">`二、Keepalived实现调度器HA`</span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 主/备调度器安装高可用软件</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> yum install -y keepalived</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; ha-master节点keepalived配置</span></span><br><span class="line">[root@ha-master ~]# mv /etc/keepalived/keepalived.conf /etc/keepalived/keepalived.conf.bak</span><br><span class="line">[root@ha-master ~]# vim /etc/keepalived/keepalived.conf</span><br><span class="line">! Configuration File for keepalived</span><br><span class="line"></span><br><span class="line">global_defs &#123;</span><br><span class="line">   router_id directory1</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state MASTER</span><br><span class="line">    interface ens33</span><br><span class="line">    virtual_router_id 80</span><br><span class="line">    priority 100</span><br><span class="line">    advert_int 1</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        192.168.174.101/24</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; ha-backup配置</span></span><br><span class="line">[root@nginx-porxy-slave ~]# mv /etc/keepalived/keepalived.conf /etc/keepalived/keepalived.conf.bak</span><br><span class="line">[root@nginx-proxy-slave ~]# vim /etc/keepalived/keepalived.conf</span><br><span class="line">! Configuration File for keepalived</span><br><span class="line"></span><br><span class="line">global_defs &#123;</span><br><span class="line">   router_id directory2</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state BACKUP</span><br><span class="line">    interface ens33</span><br><span class="line">    nopreempt        # 设置到back上面，不抢占资源(VIP)</span><br><span class="line">    virtual_router_id 80</span><br><span class="line">    priority 50</span><br><span class="line">    advert_int 1</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        192.168.174.101/24</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 启动KeepAlived（主备均启动）</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> systemctl <span class="built_in">enable</span> --now keepalived</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>global_defs</strong>：定义全局模块</p>
+<ul>
+<li><strong>router_id directory1</strong>：用于唯一标识一个路由器或设备实例。区分多个设备或实例，特别是在涉及主备（Master/Backup）配置的场景中。但Master和Backup需设置不同。</li>
+</ul>
+</li>
+<li><p><strong>vrrp_instance VI_1</strong>：定义VRRP 实例，名称为 <code>VI_1</code>。名字可以自定义，但需要确保主节点和备份节点的名称一致。</p>
+</li>
+<li><p><strong>VRRP Instance State (实例状态)</strong></p>
+<ul>
+<li><strong>state MASTER</strong>：定义当前节点的状态为 <code>MASTER</code>，表示主节点。备份节点设置为 <code>BACKUP</code>。</li>
+</ul>
+</li>
+<li><p><strong>Network Interface (网络接口)</strong></p>
+<ul>
+<li><strong>interface ens33</strong>：指定绑定 VIP 的网络接口。VIP 绑定在 <code>ens33</code> 接口上。主备服务器上都存在的物理网卡或虚拟网卡。</li>
+</ul>
+</li>
+<li><p><strong>Virtual Router ID (虚拟路由器 ID)</strong></p>
+<ul>
+<li><strong>virtual_router_id 80</strong>：设置 VRRP 虚拟路由器的 ID，范围是 0-255。主节点和备份节点的 <code>virtual_router_id</code> 必须一致，确保它们在同一个 VRRP 组中。</li>
+</ul>
+</li>
+<li><p><strong>Priority (优先级)</strong></p>
+<ul>
+<li><strong>priority 100</strong>：设置节点的优先级，范围是<code>0-255</code>。数值越高，优先级越高。主节点的优先级较高，备份节点的优先级较低，通常设置为 <code>50</code> 或其他值。优先级决定了当主节点故障时，哪个备份节点会接管 VIP。</li>
+</ul>
+</li>
+<li><p><strong>Advertisement Interval (广播间隔)</strong></p>
+<ul>
+<li><strong>advert_int 1</strong>：定义 VRRP 广播包的时间间隔，以秒为单位。这里设置为 <code>1</code> 秒，表示主节点每秒发送一次心跳信号，通知备份节点主节点在线。</li>
+</ul>
+</li>
+<li><p><strong>Authentication (认证)</strong></p>
+<ul>
+<li>authentication：定义 VRRP 实例的认证方式。<ul>
+<li><strong>auth_type PASS</strong>：指定认证类型为 <code>PASS</code>，密码认证。</li>
+<li><strong>auth_pass 1111</strong>：设置认证密码为 <code>1111</code>。主节点和备份节点的认证密码必须一致。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>Virtual IP Address (虚拟 IP 地址)</strong></p>
+<ul>
+<li><strong>virtual_ipaddress</strong>：定义虚拟 IP 地址（VIP）。 VIP 是整个集群对外暴露的 IP 地址。<ul>
+<li><strong>192.168.174.101/24</strong>：VIP 地址是 <code>192.168.174.101</code>，子网掩码为 <code>/24</code>。这个 VIP 将被绑定到主节点上，当主节点故障时，备份节点会接管该 IP。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ol start="5">
+<li><p><strong>健康检查机制</strong></p>
+<p>让 Keepalived 以一定时间间隔执行一个外部脚本，脚本的功能是当Nginx失败，则关闭本机的Keepalived，实现VIP漂移。</p>
+</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#&gt;&gt;&gt; 配置检测nginx健康检查脚本</span></span><br><span class="line">[root@ha ~]<span class="comment"># vim /etc/keepalived/check_nginx_status.sh</span></span><br><span class="line"><span class="meta">#!/bin/bash					        </span></span><br><span class="line">/usr/bin/curl -I http://localhost &amp;&gt;/dev/null</span><br><span class="line"><span class="keyword">if</span> [ $? -ne 0 ];<span class="keyword">then</span>						    </span><br><span class="line">	systemctl stop keepalived</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#&gt;&gt;&gt; 脚本添加执行权限</span></span><br><span class="line">[root@ha ~]<span class="comment"># chmod a+x /etc/keepalived/check_nginx_status.sh</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#&gt;&gt;&gt; 两台 keepalived 实例添加配置</span></span><br><span class="line">[root@ha ~]<span class="comment"># vim /etc/keepalived/keepalived.conf</span></span><br><span class="line">! Configuration File <span class="keyword">for</span> keepalived</span><br><span class="line"></span><br><span class="line">global_defs &#123;</span><br><span class="line">   router_id directory1</span><br><span class="line">&#125;</span><br><span class="line">vrrp_script check_nginx &#123;</span><br><span class="line">   script <span class="string">"/etc/keepalived/check_nginx_status.sh"</span>  </span><br><span class="line">   interval 5</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state MASTER</span><br><span class="line">    interface ens33</span><br><span class="line">    virtual_router_id 80</span><br><span class="line">    priority 100</span><br><span class="line">    advert_int 1</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        192.168.174.100/24</span><br><span class="line">    &#125;</span><br><span class="line">    track_script &#123;</span><br><span class="line">        check_nginx</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">`注：必须先启动Nginx，再启动keepalived`</span><br><span class="line"></span><br><span class="line">测试访问：  </span><br><span class="line">将keepalived集群的主节点的Nginx服务关闭，查看vip是否漂移，如果漂移，即成功</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<ul>
+<li><pre><code class="shell">vrrp_script check_nginx {   # 健康检查配置
+   script "/etc/keepalived/check_nginx_status.sh"  # 脚本绝对路径
+   interval 5        # 执行脚本间隔
+}
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">- &#96;&#96;&#96;shell</span><br><span class="line">  track_script &#123;   # 定义要跟踪的脚本或检查命令。当 Keepalived 检测到这些脚本的返回状态为非零时，会根据 VRRP 实例的配置执行相应的操作，切换到备份节点。</span><br><span class="line">      check_nginx  # 自定义脚本或命令的名称。check_nginx 检查 Nginx 服务是否正在运行。</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+</blockquote>
+<h2 id="3、LVS-Director-Keepalived"><a href="#3、LVS-Director-Keepalived" class="headerlink" title="3、LVS_Director + Keepalived"></a>3、LVS_Director + Keepalived</h2><p><img src="https://hjmimage.oss-cn-zhangjiakou.aliyuncs.com/1568643540153.png" alt="1568643540153"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br></pre></td><td class="code"><pre><span class="line">LVS_Director + KeepAlived</span><br><span class="line"></span><br><span class="line">KeepAlived在该项目中的功能：</span><br><span class="line">1. 管理IPVS的路由表（包括对RealServer做健康检查）</span><br><span class="line">2. 实现调度器的HA(高可用)</span><br><span class="line">http://www.keepalived.org</span><br><span class="line"></span><br><span class="line">Keepalived所执行的外部脚本命令建议使用绝对路径</span><br><span class="line">=================================================================================</span><br><span class="line">实施步骤：</span><br><span class="line"><span class="meta">#</span><span class="bash"> 主/备调度器安装软件</span></span><br><span class="line">[root@lvs-keepalived-master ~]# yum -y install ipvsadm keepalived </span><br><span class="line">[root@lvs-keepalived-backup ~]# yum -y install ipvsadm keepalived</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> lvs-Keepalived-master节点配置</span></span><br><span class="line">[root@lvs-keepalived-master ~]# vim /etc/keepalived/keepalived.conf</span><br><span class="line">! Configuration File for keepalived</span><br><span class="line"></span><br><span class="line">global_defs &#123;</span><br><span class="line">   router_id lvs-keepalived-master    #辅助改为lvs-backup</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state MASTER</span><br><span class="line">    interface ens33                #VIP绑定接口</span><br><span class="line">    virtual_router_id 80         #VRID 同一组集群，主备一致          </span><br><span class="line">    priority 100            #本节点优先级，辅助改为50</span><br><span class="line">    advert_int 1            #检查间隔，默认为1s</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        192.168.174.101/24</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">virtual_server 192.168.174.101 80 &#123;    #LVS配置</span><br><span class="line">	delay_loop 3  #启动3个进程</span><br><span class="line">	lb_algo rr     #LVS调度算法</span><br><span class="line">	lb_kind DR     #LVS集群模式（路由模式）</span><br><span class="line">	nat_mask 255.255.255.0</span><br><span class="line">	protocol TCP      #健康检查使用的协议</span><br><span class="line">	real_server 192.168.174.40 80 &#123;</span><br><span class="line">		weight 1</span><br><span class="line">		inhibit_on_failure   #当该节点失败时，把权重设置为0，而不是从IPVS中删除</span><br><span class="line">		TCP_CHECK &#123;          #健康检查</span><br><span class="line">			connect_port 80   #检查的端口</span><br><span class="line">			connect_timeout 3  #连接超时的时间</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	real_server 192.168.174.41 80 &#123;</span><br><span class="line">		weight 1</span><br><span class="line">		inhibit_on_failure</span><br><span class="line">		TCP_CHECK &#123;</span><br><span class="line">			connect_timeout 3</span><br><span class="line">			connect_port 80</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> lvs-keepalived-backup节点配置</span></span><br><span class="line">[root@lvs-keepalived-backup ~]# vim /etc/keepalived/keepalived.conf</span><br><span class="line">! Configuration File for keepalived</span><br><span class="line"></span><br><span class="line">global_defs &#123;</span><br><span class="line">   router_id lvs-keepalived-slave</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state BACKUP</span><br><span class="line">    interface ens33</span><br><span class="line">    nopreempt                    #不抢占VIP</span><br><span class="line">    virtual_router_id 80</span><br><span class="line">    priority 50</span><br><span class="line">    advert_int 1</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        192.168.174.101/24</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">virtual_server 192.168.174.101 80 &#123;</span><br><span class="line">	delay_loop 3</span><br><span class="line">	lb_algo rr</span><br><span class="line">	lb_kind DR</span><br><span class="line">	nat_mask 255.255.255.0</span><br><span class="line">	protocol TCP</span><br><span class="line">	real_server 192.168.174.40 80 &#123;</span><br><span class="line">		weight 1</span><br><span class="line">		inhibit_on_failure</span><br><span class="line">		TCP_CHECK &#123;</span><br><span class="line">			connect_port 80</span><br><span class="line">			connect_timeout 3</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	real_server 192.168.174.41 80 &#123;</span><br><span class="line">		weight 1</span><br><span class="line">		inhibit_on_failure</span><br><span class="line">		TCP_CHECK &#123;</span><br><span class="line">			connect_timeout 3</span><br><span class="line">			connect_port 80</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 启动Keepalived（主备均启动）</span></span><br><span class="line">[root@lvs-keepalived-master ~]# systemctl enable  --now keepalived</span><br><span class="line">[root@lvs-keepalived-backup ~]# systemctl enable  --now keepalived</span><br><span class="line"></span><br><span class="line">[root@lvs-keepalived-master ~]# ipvsadm -Ln</span><br><span class="line">IP Virtual Server version 1.2.1 (size=4096)</span><br><span class="line">Prot LocalAddress:Port Scheduler Flags</span><br><span class="line"><span class="meta">  -&gt;</span><span class="bash"> RemoteAddress:Port           Forward Weight ActiveConn InActConn</span></span><br><span class="line">TCP  192.168.174.101:80 rr</span><br><span class="line"><span class="meta">  -&gt;</span><span class="bash"> 192.168.174.39:80            Route   1      1          8         </span></span><br><span class="line"><span class="meta">  -&gt;</span><span class="bash"> 192.168.174.40:80            Route   1      0          9 </span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 所有RS配置(nginx1,nginx2)，配置好网站服务器，测试所有RS</span></span><br><span class="line">[root@real-server01 ~]# yum install -y nginx</span><br><span class="line">[root@real-server02 ~]# yum install -y nginx</span><br><span class="line"></span><br><span class="line">[root@real-server01 ~]# ip addr add dev lo 192.168.246.101/32</span><br><span class="line">[root@real-server02 ~]# ip addr add dev lo 192.168.246.101/32</span><br><span class="line"></span><br><span class="line">[root@real-server01 ~]# echo 1 &gt; /proc/sys/net/ipv4/conf/all/arp_ignore #忽略arp广播</span><br><span class="line">[root@real-server01 ~]# echo 2 &gt; /proc/sys/net/ipv4/conf/all/arp_announce #匹配精确ip地址回包</span><br><span class="line"></span><br><span class="line">[root@real-server02 ~]# echo 1 &gt; /proc/sys/net/ipv4/conf/all/arp_ignore #忽略arp广播</span><br><span class="line">[root@real-server02 ~]# echo 2 &gt; /proc/sys/net/ipv4/conf/all/arp_announce #匹配精确ip地址回包</span><br><span class="line"></span><br><span class="line">[root@real-server01 ~]# echo "web1..." &gt;&gt; /usr/share/nginx/html/index.html</span><br><span class="line">[root@real-server02 ~]# echo "web2..." &gt;&gt; /usr/share/nginx/html/index.html</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 所有real-server节点启动nginx</span></span><br><span class="line">[root@real-server ~]# systemctl enable --now nginx</span><br><span class="line"></span><br><span class="line">LB集群测试</span><br><span class="line">所有分发器和Real Server都正常</span><br><span class="line"></span><br><span class="line">主分发器故障及恢复</span><br></pre></td></tr></table></figure>
+
+<h3 id><a href="#" class="headerlink" title></a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state MASTER</span><br><span class="line">    interface ens33</span><br><span class="line">    virtual_router_id 80       </span><br><span class="line">    priority 100</span><br><span class="line">    advert_int 1</span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        192.168.174.101/24</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">virtual_server 192.168.174.101 80 &#123;</span><br><span class="line">	delay_loop 3</span><br><span class="line">	lb_algo rr</span><br><span class="line">	lb_kind DR</span><br><span class="line">	nat_mask 255.255.255.0</span><br><span class="line">	protocol TCP</span><br><span class="line">	real_server 192.168.174.40 80 &#123;</span><br><span class="line">		weight 1</span><br><span class="line">		inhibit_on_failure</span><br><span class="line">		TCP_CHECK &#123;</span><br><span class="line">			connect_port 80</span><br><span class="line">			connect_timeout 3</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	real_server 192.168.174.41 80 &#123;</span><br><span class="line">		weight 1</span><br><span class="line">		inhibit_on_failure</span><br><span class="line">		TCP_CHECK &#123;</span><br><span class="line">			connect_timeout 3</span><br><span class="line">			connect_port 80</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="Haproxy-基础"><a href="#Haproxy-基础" class="headerlink" title="Haproxy 基础"></a>Haproxy 基础</h1><p><img src="https://youngfitfei.oss-cn-beijing.aliyuncs.com/img/1562943827261.png" alt=" "></p>
+<h2 id="1、Haproxy介绍"><a href="#1、Haproxy介绍" class="headerlink" title="1、Haproxy介绍"></a>1、Haproxy介绍</h2><p>​    HAProxy是一个高性能的开源负载均衡器和代理服务器，使用C语言编写，提供高可用性、负载均衡，以及基于TCP和HTTP的应用程序代理。其特别适用于负载特大的web站点，这些站点通常又需要会话保持或七层处理。HAProxy可以运行在当前的硬件上，支持数以万计的并发连接，并且能够很简单安全地整合进用户当前的架构中，同时保护web服务器不被暴露到网络上。</p>
+<p>HAProxy的工作原理是，当客户端发起连接请求时，它将连接到HAProxy提供的IP地址和端口。HAProxy能够将传入的请求分发到多个后端服务器，并提供各种负载均衡算法，如轮询、加权轮询、最少连接等。同时，HAProxy具有高度可配置性和可定制性，适用于Web应用、数据库负载均衡、应用程序代理等场景，提供高可用性和可伸缩性。</p>
+<p>特点：</p>
+<ul>
+<li>支持tcp/http两种协议层的负载均衡，使得其负载均衡功能非常丰富。</li>
+<li>支持8种左右的负载均衡算法，尤其是在http模式时，有许多非常实在的负载均衡算法，适用各种需求。</li>
+<li>性能非常优秀，基于单进程处理模式（和Nginx类似）让其性能卓越。</li>
+<li>拥有一个功能出色的监控页面，实时了解系统的当前状况。</li>
+<li>功能强大的ACL支持，给用户极大的方便。</li>
+</ul>
+<h2 id="2、Haproxy-实现七层负载实验"><a href="#2、Haproxy-实现七层负载实验" class="headerlink" title="2、Haproxy 实现七层负载实验"></a><strong>2、Haproxy 实现七层负载实验</strong></h2><p><strong><code>流程图：</code></strong></p>
+<p><img src="https://hjmimage.oss-cn-zhangjiakou.aliyuncs.com/202408131109708.png" alt="image-20240813110902650"></p>
+<p><strong>实验操作流程：</strong></p>
+<ol>
+<li><strong>主机划分</strong></li>
+</ol>
+<ul>
+<li><pre><code class="ini"><span class="section">[root@haproxy-master ~]</span><span class="comment"># cat /etc/hosts</span>
+
+192.168.174.38    haproxy-master
+192.168.174.39    haproxy-backup
+192.168.174.40    real-server01 
+192.168.174.41    real-server02
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">2. **两台real-server配置**</span><br><span class="line"></span><br><span class="line">- &#96;&#96;&#96;shell</span><br><span class="line">  #&gt;&gt;&gt; 关闭防火墙及selinux</span><br><span class="line">  $ systemctl disable --now firewalld &amp;&amp; setenforce 0</span><br><span class="line">  </span><br><span class="line">  #&gt;&gt;&gt; 安装nginx</span><br><span class="line">  $ yum install -y nginx</span><br><span class="line">  </span><br><span class="line">  #&gt;&gt;&gt; 准备测试文件</span><br><span class="line">  [root@real-server01 ~]# echo nginx01  &gt; &#x2F;usr&#x2F;share&#x2F;nginx&#x2F;html&#x2F;index.html </span><br><span class="line">  </span><br><span class="line">  [root@real-server02 ~]# echo nginx02 &gt; &#x2F;usr&#x2F;share&#x2F;nginx&#x2F;html&#x2F;index.html </span><br><span class="line">  </span><br><span class="line">  #&gt;&gt;&gt; 修改配置文件keepalive_timeout时长</span><br><span class="line">  $ vim &#x2F;etc&#x2F;nginx&#x2F;nginx.conf</span><br><span class="line">  ···</span><br><span class="line">  keepalive_timeout  0;</span><br><span class="line">  ···</span><br><span class="line">  </span><br><span class="line">  #&gt;&gt;&gt; 两台real-server启动nginx</span><br><span class="line">  $ systemctl enable --now nginx</span><br><span class="line">  </span><br><span class="line">  #&gt;&gt;&gt; 测试访问</span><br><span class="line">  略</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+<ol start="3">
+<li><strong>两台负载均衡服务器配置</strong></li>
+</ol>
+<ul>
+<li><pre><code class="shell"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 安装haproxy</span>
+<span class="meta">$</span><span class="bash"> yum install -y haproxy</span>
+
+<span class="meta">#</span><span class="bash">&gt;&gt;&gt; 修改Haproxy配置文件</span>
+<span class="meta">$</span><span class="bash"> vim  /etc/haproxy/haproxy.cfg</span>
+global
+    log         127.0.0.1 local2 info
+    pidfile     /var/run/haproxy.pid
+    maxconn     4000
+    user        haproxy
+    group       haproxy
+    daemon
+    nbproc 1
+defaults
+    mode                    http
+    log                     global
+    retries                 3
+    option                  redispatch
+    maxconn                 4000
+    contimeout                5000
+    clitimeout                50000
+    srvtimeout                50000
+listen stats
+    bind            *:81
+    stats                       enable
+    stats uri                  /haproxy
+    stats auth               qianfeng:123
+frontend  web
+    mode                       http  
+    bind                            *:80
+    option                  httplog
+    acl html url_reg  -i  \.html$
+    use_backend httpservers if  html
+    default_backend    httpservers
+backend httpservers
+    balance     roundrobin
+    server  http1 192.168.174.40:80 maxconn 2000 weight 1  check inter 1s rise 2 fall 2
+    server  http2 192.168.174.41:80 maxconn 2000 weight 1  check inter 1s rise 2 fall 2
+
+<span class="meta">#</span><span class="bash">&gt;&gt;&gt; 启动haproxy</span>
+<span class="meta">$</span><span class="bash"> systemctl <span class="built_in">enable</span> --now haproxy</span>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">**配置文件详细：**</span><br><span class="line"></span><br><span class="line">1. **全局配置**</span><br><span class="line"></span><br><span class="line">&#96;&#96;&#96;ini</span><br><span class="line">global</span><br><span class="line">    log         127.0.0.1 local2 info</span><br><span class="line">    pidfile     &#x2F;var&#x2F;run&#x2F;haproxy.pid</span><br><span class="line">    maxconn     4000</span><br><span class="line">    user        haproxy</span><br><span class="line">    group       haproxy</span><br><span class="line">    daemon</span><br><span class="line">    nbproc 1</span><br></pre></td></tr></table></figure>
+</code></pre>
+</li>
+</ul>
+<p><strong><code>log 127.0.0.1 local2 info</code></strong>:</p>
+<ul>
+<li>日志记录配置。<code>127.0.0.1</code>表示日志发送到本地的Syslog服务器，<code>local2</code>是Syslog的设施（facility），<code>info</code>是日志级别。</li>
+</ul>
+<p><strong><code>pidfile /var/run/haproxy.pid</code></strong>:</p>
+<ul>
+<li>指定HAProxy进程ID的文件位置。</li>
+</ul>
+<p><strong><code>maxconn 4000</code></strong>:</p>
+<ul>
+<li>设置HAProxy允许的最大并发连接数为4000。超出这个限制的连接将被队列或拒绝。</li>
+</ul>
+<p><strong><code>user haproxy</code> 和 <code>group haproxy</code></strong>:</p>
+<ul>
+<li>指定HAProxy以哪个用户和用户组身份运行，以提高安全性。</li>
+</ul>
+<p><strong><code>daemon</code></strong>:</p>
+<ul>
+<li>使HAProxy以后台守护进程的方式运行，不阻塞终端。</li>
+</ul>
+<p><strong><code>nbproc 1</code></strong>:</p>
+<ul>
+<li>指定HAProxy运行的进程数量。<code>1</code>表示单进程模式。通常情况下，设置为服务器的CPU核心数，以充分利用多核CPU的性能。</li>
+</ul>
+<p>==========================================================================================================================================================================</p>
+<ol start="2">
+<li><strong>默认配置</strong></li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">defaults</span><br><span class="line">    mode                    http</span><br><span class="line">    log                     global</span><br><span class="line">    retries                 3</span><br><span class="line">    option                  redispatch</span><br><span class="line">    maxconn                 4000</span><br><span class="line">    contimeout	            5000</span><br><span class="line">    clitimeout	            50000</span><br><span class="line">    srvtimeout	            50000</span><br></pre></td></tr></table></figure>
+
+<p><strong><code>mode http</code></strong>:</p>
+<ul>
+<li>设置HAProxy的工作模式为HTTP（7层），可以处理应用层的内容，如URL、头信息等。如果设置为TCP（4层），则只能处理传输层数据。</li>
+</ul>
+<p><strong><code>log global</code></strong>:</p>
+<ul>
+<li>继承全局配置中的日志设置。</li>
+</ul>
+<p><strong><code>retries 3</code></strong>:</p>
+<ul>
+<li>如果连接后端服务器失败，HAProxy会尝试重新连接3次。如果仍然失败，认为该服务器不可用。</li>
+</ul>
+<p><strong><code>option redispatch</code></strong>:</p>
+<ul>
+<li>如果某个服务器不可用，HAProxy会重新分配请求到其他健康的服务器，确保服务的可用性。</li>
+</ul>
+<p><strong><code>maxconn 4000</code></strong>:</p>
+<ul>
+<li>设置每个连接的最大并发数为4000，与全局配置中相同。</li>
+</ul>
+<p><strong><code>contimeout 5000</code></strong>:</p>
+<ul>
+<li>设置HAProxy与后端服务器建立连接的超时时间为5000毫秒（5秒）。</li>
+</ul>
+<p><strong><code>clitimeout 50000</code></strong>:</p>
+<ul>
+<li>设置客户端与HAProxy之间连接的超时时间为50000毫秒（50秒）。</li>
+</ul>
+<p><strong><code>srvtimeout 50000</code></strong>:</p>
+<ul>
+<li>设置后端服务器处理请求的超时时间为50000毫秒（50秒）。</li>
+</ul>
+<p>==========================================================================================================================================================================</p>
+<ol start="3">
+<li><strong>统计页面配置</strong></li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">listen stats</span><br><span class="line">    bind			*:81</span><br><span class="line">    stats enable</span><br><span class="line">    stats uri              	/haproxy</span><br><span class="line">    stats auth           	qianfeng:123</span><br></pre></td></tr></table></figure>
+
+<p><strong><code>bind *:81</code></strong>:</p>
+<ul>
+<li>监听所有IP地址的81端口，用于访问HAProxy的统计页面。</li>
+</ul>
+<p><strong><code>stats enable</code></strong>:</p>
+<ul>
+<li>启用统计页面。</li>
+</ul>
+<p><strong><code>stats uri /haproxy</code></strong>:</p>
+<ul>
+<li>指定访问统计页面的URI路径，即<code>http://&lt;HAProxy-IP&gt;:81/haproxy</code>。</li>
+</ul>
+<p><strong><code>stats auth qianfeng:123</code></strong>:</p>
+<ul>
+<li>启用用户认证，用户名为<code>qianfeng</code>，密码为<code>123</code>。访问统计页面时需要输入此用户名和密码。</li>
+</ul>
+<p>==========================================================================================================================================================================</p>
+<ol start="4">
+<li><strong>前端配置</strong></li>
+</ol>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">frontend web</span><br><span class="line">    mode                   http  </span><br><span class="line">    bind                   *:80  </span><br><span class="line">    option                 httplog		</span><br><span class="line">    acl html url_reg  -i  \.html$</span><br><span class="line">    use_backend httpservers if  html </span><br><span class="line">    default_backend    httpservers</span><br></pre></td></tr></table></figure>
+
+<p><strong><code>frontend web</code></strong>:</p>
+<ul>
+<li>定义前端，名字为<code>web</code>。前端是客户端请求的入口。</li>
+</ul>
+<p><strong><code>mode http</code></strong>:</p>
+<ul>
+<li>设定前端的为HTTP。</li>
+</ul>
+<p><strong><code>bind *:80</code></strong>:</p>
+<ul>
+<li>监听所有IP地址的80端口，所有通过80端口的HTTP请求都会被接收。</li>
+</ul>
+<p><strong><code>option httplog</code></strong>:</p>
+<ul>
+<li>启用HTTP日志格式，记录HTTP相关的详细日志。</li>
+</ul>
+<p><strong><code>acl html url_reg -i \.html$</code></strong>:</p>
+<ul>
+<li>定义一个访问控制列表（ACL），名称为<code>html</code>。规则是匹配以<code>.html</code>结尾的URL（不区分大小写）。</li>
+</ul>
+<p><strong><code>use_backend httpservers if html</code></strong>:</p>
+<ul>
+<li>如果请求的URL匹配<code>html</code> ACL规则，则将请求转发到后端服务器组<code>httpservers</code>。</li>
+</ul>
+<p><strong><code>default_backend httpservers</code></strong>:</p>
+<ul>
+<li>如果请求不匹配任何ACL规则，则使用默认的后端服务器组<code>httpservers</code>。</li>
+</ul>
+<p>==========================================================================================================================================================================</p>
+<ol start="5">
+<li><strong>后端配置</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">backend httpservers</span><br><span class="line">    balance     roundrobin</span><br><span class="line">    server  http1 192.168.246.162:80 maxconn 2000 weight 1  check inter 1s rise 2 fall 2</span><br><span class="line">    server  http2 192.168.246.163:80 maxconn 2000 weight 1  check inter 1s rise 2 fall 2</span><br></pre></td></tr></table></figure>
+
+<p><strong><code>backend httpservers</code></strong>:</p>
+<ul>
+<li>定义后端服务器组，名称为<code>httpservers</code>。后端服务器组是用于处理实际请求的服务器。</li>
+</ul>
+<p><strong><code>balance roundrobin</code></strong>:</p>
+<ul>
+<li>负载均衡策略为轮询（Roundrobin），请求会依次分配到每个服务器。</li>
+</ul>
+<p><strong><code>server http1 192.168.246.162:80 maxconn 2000 weight 1 check inter 1s rise 2 fall 2</code></strong>:</p>
+<ul>
+<li>定义一台后端服务器<code>http1</code>：<ul>
+<li><code>192.168.246.162:80</code>: 服务器的IP地址和端口号。</li>
+<li><code>maxconn 2000</code>: 这台服务器允许的最大连接数为2000。</li>
+<li><code>weight 1</code>: 权重为1，影响负载均衡的分配比例，默认情况下权重越高，分配的请求越多。</li>
+<li><code>check</code>: 启用健康检查，定期检查该服务器的状态。</li>
+<li><code>inter 1s</code>: 每1秒进行一次健康检查。</li>
+<li><code>rise 2</code>: 连续2次检查通过后认为服务器健康。</li>
+<li><code>fall 2</code>: 连续2次检查失败后认为服务器不健康。</li>
+</ul>
+</li>
+</ul>
+<p>==========================================================================================================================================================================</p>
+<p><strong>测试主/备(浏览器访问）</strong></p>
+<p><a href="http://192.168.174.38:81/haproxy" target="_blank" rel="noopener">http://192.168.174.38:81/haproxy</a></p>
+<p><img src="https://youngfitfei.oss-cn-beijing.aliyuncs.com/img/1569121374136.png" alt="1569121374136"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">页面主要参数解释</span><br><span class="line">Queue</span><br><span class="line">Cur: current queued requests //当前的队列请求数量</span><br><span class="line">Max：max queued requests     //最大的队列请求数量</span><br><span class="line">Limit：           //队列限制数量</span><br><span class="line"></span><br><span class="line">Errors</span><br><span class="line">Req：request errors             //错误请求</span><br><span class="line">Conn：connection errors          //错误的连接</span><br><span class="line"></span><br><span class="line">Server列表：</span><br><span class="line">Status:状态，包括up(后端机活动)和down(后端机挂掉)两种状态</span><br><span class="line">LastChk:    持续检查后端服务器的时间</span><br><span class="line">Wght: (weight) : 权重</span><br><span class="line">========================================================</span><br><span class="line">2.测试访问</span><br><span class="line">通过访问haparoxy的ip地址访问到后端服务器</span><br><span class="line"><span class="meta">#</span><span class="bash"> curl http://192.168.246.169</span></span><br><span class="line"></span><br><span class="line">如果出现bind失败的报错，执行下列命令</span><br><span class="line">set sebool -P haproxy_connect_any=1</span><br></pre></td></tr></table></figure>
+
+<h2 id="3、Haprxoy-Keepalived实现高可用"><a href="#3、Haprxoy-Keepalived实现高可用" class="headerlink" title="3、Haprxoy+Keepalived实现高可用"></a>3、Haprxoy+Keepalived实现高可用</h2><ol>
+<li><strong>两台负载均衡服务器安装Keepalived</strong></li>
+</ol>
+<ul>
+<li><pre><code class="bash"><span class="comment">#&gt;&gt;&gt; 安装Keepalived</span>
+$ yum install -y keepalived
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">2. **&#96;haproxy-master&#96;节点配置**</span><br><span class="line"></span><br><span class="line">- &#96;&#96;&#96;bash</span><br><span class="line">  #&gt;&gt;&gt; 编写外部检查Haprxoy健康状态脚本</span><br><span class="line">  [root@haproxy-master ~]# vim &#x2F;etc&#x2F;keepalived&#x2F;check_haproxy_status.sh </span><br><span class="line">  #!&#x2F;bin&#x2F;bash</span><br><span class="line">  &#x2F;usr&#x2F;bin&#x2F;curl -I http:&#x2F;&#x2F;localhost &amp;&gt;&#x2F;dev&#x2F;null   </span><br><span class="line">  if [ $? -ne 0 ];then                                                   </span><br><span class="line">          systemctl stop keepalived</span><br><span class="line">  fi</span><br><span class="line">  </span><br><span class="line">  #&gt;&gt;&gt; 脚本添加执行权限</span><br><span class="line">  [root@haproxy-master ~]# chmod +x &#x2F;etc&#x2F;keepalived&#x2F;check_haproxy_status.sh</span><br><span class="line">  </span><br><span class="line">  #&gt;&gt;&gt; 将检查脚本scp至haproxy-backup节点</span><br><span class="line">  [root@haproxy-master ~]# scp check_haproxy_status.sh  192.168.174.39:&#x2F;etc&#x2F;keepalived&#x2F;</span><br><span class="line">  </span><br><span class="line">  #&gt;&gt;&gt; 编写Keepalived配置文件</span><br><span class="line">  [root@haproxy-master ~]# vim &#x2F;etc&#x2F;keepalived&#x2F;keepalived.conf</span><br><span class="line">  ! Configuration File for keepalived</span><br><span class="line">  </span><br><span class="line">  global_defs &#123;</span><br><span class="line">     router_id director1</span><br><span class="line">  &#125;</span><br><span class="line">  vrrp_script check_haproxy &#123;</span><br><span class="line">     script &quot;&#x2F;etc&#x2F;keepalived&#x2F;check_haproxy_status.sh&quot; # 脚本绝对路径</span><br><span class="line">     interval 5  # 执行脚本间隔时间</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  vrrp_instance VI_1 &#123;</span><br><span class="line">      state MASTER</span><br><span class="line">      interface ens33</span><br><span class="line">      virtual_router_id 80</span><br><span class="line">      priority 100</span><br><span class="line">      advert_int 1</span><br><span class="line">      authentication &#123;</span><br><span class="line">          auth_type PASS</span><br><span class="line">          auth_pass 1111</span><br><span class="line">      &#125;</span><br><span class="line">      virtual_ipaddress &#123;</span><br><span class="line">          192.168.174.105&#x2F;24   # VIP地址</span><br><span class="line">      &#125;</span><br><span class="line">      track_script &#123;</span><br><span class="line">          check_haproxy</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+<ol start="3">
+<li><strong><code>Haproxy-backup</code>节点配置</strong></li>
+</ol>
+<ul>
+<li><pre><code class="shell"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 脚本添加执行权限</span>
+[root@haproxy-master ~]# chmod +x /etc/keepalived/check_haproxy_status.sh
+
+<span class="meta">#</span><span class="bash">&gt;&gt;&gt; 编写Keepalived配置文件</span>
+[root@haproxy-backup ~]# vim /etc/keepalived/keepalived.conf 
+! Configuration File for keepalived
+
+global_defs {
+   router_id directory2
+}
+vrrp_script check_haproxy {
+   script "/etc/keepalived/check_haproxy_status.sh"
+   interval 5
+}
+
+vrrp_instance VI_1 {
+    state BACKUP
+    interface ens33
+    nopreempt
+    virtual_router_id 80
+    priority 50
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass 1111
+    }
+    virtual_ipaddress {
+        192.168.174.105/24
+    }
+    track_script {
+        check_haproxy
+    }
+}
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">4. **两台负载均衡器配置**</span><br><span class="line"></span><br><span class="line">- &#96;&#96;&#96;shell</span><br><span class="line">  #&gt;&gt;&gt; 重启Keepalived和Haproxy</span><br><span class="line">  $ systemctl restart keepalived haproxy</span><br><span class="line">  </span><br><span class="line">  #&gt;&gt;&gt; 加入开机自启</span><br><span class="line">  $ systemctl enable  keepalived haproxy</span><br></pre></td></tr></table></figure></code></pre>
+</li>
+</ul>
+<ol start="5">
+<li><strong>查看<code>haproxy-master</code>节点网卡</strong></li>
+</ol>
+<ul>
+<li><img src="https://hjmimage.oss-cn-zhangjiakou.aliyuncs.com/202408131137222.png" alt="image-20240813113730090"></li>
+</ul>
+<blockquote>
+<p>提示：</p>
+<p>​    为了保证实验的完整性，需要把<code>haproxy-master</code>节点中的<code>haproxy</code>服务停止，以实现VIP漂移。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@haproxy-master ~]# systemctl stop haproxy</span><br></pre></td></tr></table></figure>
+
+<p>检查<code>haproxy-backup</code>节点网卡：</p>
+<p><img src="https://hjmimage.oss-cn-zhangjiakou.aliyuncs.com/202408131140536.png" alt="image-20240813114045428"></p>
+</blockquote>
+<h2 id="4、Haproxy日志开启"><a href="#4、Haproxy日志开启" class="headerlink" title="4、Haproxy日志开启"></a>4、Haproxy日志开启</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 编辑rsyslog配置文件</span></span><br><span class="line">[root@ha-proxy-master ~]# vim /etc/rsyslog.conf </span><br><span class="line"><span class="meta">#</span><span class="bash"> Provides UDP syslog reception  <span class="comment">#由于haproxy的日志是用udp传输的,所以要启用rsyslog的udp监听</span></span></span><br><span class="line"><span class="meta">$</span><span class="bash">ModLoad imudp</span></span><br><span class="line"><span class="meta">$</span><span class="bash">UDPServerRun 514</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 找到  <span class="comment">#### RULES ####   下面添加</span></span></span><br><span class="line">local2.*                       /var/log/haproxy.log</span><br><span class="line"><span class="meta">	#</span><span class="bash"> 参数解释</span></span><br><span class="line"><span class="meta">		#</span><span class="bash"> <span class="variable">$ModLoad</span> imudp：ModLoad加载指定模块。imudp：模块名称，用于从 UDP 网络连接中接收日志消息。</span></span><br><span class="line"><span class="meta">		#</span><span class="bash"> local2 日志消息的一个分类标识符。在此配置中，local2可能与HAProxy的日志配置相关联。* 是优先级选择器，表示所有优先级的日志消息（从最紧急的emerg到最不重要的debug）都要被记录。</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 重启服务</span></span><br><span class="line">[root@ha-proxy-master ~]# systemctl restart rsyslog haproxy</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 查看日志</span></span><br><span class="line">[root@ha-proxy-master ~]# tail -f /var/log/haproxy.log</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://hjmimage.oss-cn-zhangjiakou.aliyuncs.com/202408131056007.png" alt="image-20240813105637812"></p>
+<h2 id="5、Haproxy-实现四层负载均衡-了解"><a href="#5、Haproxy-实现四层负载均衡-了解" class="headerlink" title="5、Haproxy 实现四层负载均衡(了解)"></a><strong>5、Haproxy 实现四层负载均衡(了解)</strong></h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 两台real server安转mariadb  mariadb-server</span></span><br><span class="line">[root@real-server ~]# yum install -y mariadb-server</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 启动mariadb</span></span><br><span class="line">[root@real-server ~]# systemctl enable --now mariadb</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 连接数据库</span></span><br><span class="line">[root@real-server ~]# mysql -uroot -p</span><br><span class="line"><span class="meta">	#</span><span class="bash">&gt;&gt;&gt; 修改root用户密码和主机地址</span></span><br><span class="line">MariaDB [(none)]&gt; grant all privileges on *.* to root@'%' identified by '123456';</span><br><span class="line"></span><br><span class="line"><span class="meta">	#</span><span class="bash">&gt;&gt;&gt; 刷新权限</span></span><br><span class="line">MariaDB [(none)]&gt; flush privileges;</span><br><span class="line"></span><br><span class="line"><span class="meta">	#</span><span class="bash">&gt;&gt;&gt; 退出DB</span></span><br><span class="line">MariaDB [(none)]&gt; exit;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">&gt;&gt;&gt; 修改两台haproxy服务配置文件</span></span><br><span class="line">[root@ha-proxy-master ~]# cat /etc/haproxy/haproxy.cfg</span><br><span class="line">Haproxy L4</span><br><span class="line">========================================================================</span><br><span class="line">global</span><br><span class="line">    log         127.0.0.1 local2</span><br><span class="line">    pidfile     /var/run/haproxy.pid</span><br><span class="line">    maxconn     4000</span><br><span class="line">    user        haproxy</span><br><span class="line">    group       haproxy</span><br><span class="line">    daemon</span><br><span class="line">    nbproc      1</span><br><span class="line">defaults</span><br><span class="line">    mode                    http</span><br><span class="line">    log                     global</span><br><span class="line">    option                  redispatch</span><br><span class="line">    retries                 3</span><br><span class="line">    maxconn                 4000</span><br><span class="line">    contimeout	            5000</span><br><span class="line">    clitimeout	            50000</span><br><span class="line">	srvtimeout	            50000</span><br><span class="line">listen stats</span><br><span class="line">    bind			*:81</span><br><span class="line">    stats                   	enable</span><br><span class="line">    stats uri              	/haproxy</span><br><span class="line">    stats auth           	qianfeng:123</span><br><span class="line">frontend  web</span><br><span class="line">    mode                   	http</span><br><span class="line">    bind                    	    *:80</span><br><span class="line">    option                  httplog</span><br><span class="line">    default_backend    httpservers</span><br><span class="line">backend httpservers</span><br><span class="line">    balance     roundrobin</span><br><span class="line">    server  http1 192.168.246.162:80 maxconn 2000 weight 1  check inter 1s rise 2 fall 2</span><br><span class="line">    server  http2 192.168.246.163:80 maxconn 2000 weight 1  check inter 1s rise 2 fall 2</span><br><span class="line"><span class="meta">#</span><span class="bash"> 添加已下字段    </span></span><br><span class="line">listen mysql</span><br><span class="line">    bind *:3306</span><br><span class="line">    mode tcp</span><br><span class="line">    balance roundrobin</span><br><span class="line">    server mysql1 192.168.246.163:3306 weight 1  check inter 1s rise 2 fall 2</span><br><span class="line">    server mysql2 192.168.246.162:3306 weight 1  check inter 1s rise 2 fall 2</span><br></pre></td></tr></table></figure>
+
+<p>最后可以在<a href="http://192.168.174.38:81/haproxy上看到下面会多出一行是MySQL的。" target="_blank" rel="noopener">http://192.168.174.38:81/haproxy上看到下面会多出一行是MySQL的。</a></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">L66</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://l66stbz.github.io/2024/08/12/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1+keepalived/">https://l66stbz.github.io/2024/08/12/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1+keepalived/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://l66stbz.github.io" target="_blank">L66</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linux/">Linux</a><a class="post-meta__tags" href="/tags/LVS/">LVS</a><a class="post-meta__tags" href="/tags/Keepalived/">Keepalived</a><a class="post-meta__tags" href="/tags/Haproxy/">Haproxy</a></div><div class="post_share"><div class="social-share" data-image="https://l66stbz.github.io/2024/08/13/LVS-NAT-Keepalived/1.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"/><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-button button--primary button--animated"> <i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="post-qr-code__img" src="/img/wechat.jpg" alt="微信"/><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="post-qr-code__img" src="/img/alipay.jpg" alt="支付寶"/><div class="post-qr-code__desc">支付寶</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="prev-post pull_left"><a href="/2024/08/13/LVS-NAT-Keepalived/"><img class="prev_cover" src="https://l66stbz.github.io/2024/08/13/LVS-NAT-Keepalived/1.png" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">LVS-NAT-Keepalived</div></div></a></div><div class="next-post pull_right"><a href="/2024/08/11/%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1-LVS/"><img class="next_cover" src="https://l66stbz.github.io/2024/08/11/负载均衡-LVS/1.png" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">负载均衡-LVS</div></div></a></div></nav><div class="relatedPosts"><div class="relatedPosts_headline"><i class="fa fa-fw fa-thumbs-up" aria-hidden="true"></i><span> 相关推荐</span></div><div class="relatedPosts_list"><div class="relatedPosts_item"><a href="/2024/08/13/LVS-NAT-Keepalived/" title="LVS-NAT-Keepalived"><img class="relatedPosts_cover" src="https://l66stbz.github.io/2024/08/13/LVS-NAT-Keepalived/1.png"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2024-08-13</div><div class="relatedPosts_title">LVS-NAT-Keepalived</div></div></a></div><div class="relatedPosts_item"><a href="/2024/05/24/自动化脚本/" title="自动化脚本"><img class="relatedPosts_cover" src="https://l66stbz.github.io/2024/05/24/自动化脚本/1.png"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2024-05-24</div><div class="relatedPosts_title">自动化脚本</div></div></a></div><div class="relatedPosts_item"><a href="/2024/05/21/Keepalived/" title="Keepalived"><img class="relatedPosts_cover" src="https://l66stbz.github.io/2024/05/21/Keepalived/1.png"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2024-05-21</div><div class="relatedPosts_title">Keepalived</div></div></a></div><div class="relatedPosts_item"><a href="/2024/08/11/负载均衡-LVS/" title="负载均衡-LVS"><img class="relatedPosts_cover" src="https://l66stbz.github.io/2024/08/11/负载均衡-LVS/1.png"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2024-08-11</div><div class="relatedPosts_title">负载均衡-LVS</div></div></a></div><div class="relatedPosts_item"><a href="/2024/07/31/Linux内核升级/" title="Linux内核升级"><img class="relatedPosts_cover" src="https://l66stbz.github.io/2024/07/31/Linux内核升级/1.png"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2024-07-31</div><div class="relatedPosts_title">Linux内核升级</div></div></a></div><div class="relatedPosts_item"><a href="/2024/07/05/WEB服务器/" title="WEB服务器"><img class="relatedPosts_cover" src="https://l66stbz.github.io/2024/07/05/WEB服务器/4.png"><div class="relatedPosts_main is-center"><div class="relatedPosts_date"><i class="fa fa-calendar fa-fw" aria-hidden="true"></i> 2024-07-05</div><div class="relatedPosts_title">WEB服务器</div></div></a></div></div><div class="clear_both"></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By L66</div><div class="framework-info"><span>驱动 </span><a href="https://hexo.io" target="_blank" rel="noopener"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 </span><a href="https://github.com/jerryc127/hexo-theme-butterfly" target="_blank" rel="noopener"><span>Butterfly</span></a></div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><i class="fa fa-book" id="readmode" title="阅读模式"></i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换" target="_self">繁</a><i class="darkmode fa fa-moon-o" id="darkmode" title="夜间模式"></i></div><div id="rightside-config-show"><div id="rightside_config" title="设置"><i class="fa fa-cog" aria-hidden="true"></i></div><i class="fa fa-list-ul close" id="mobile-toc-button" title="目录" aria-hidden="true"></i><i class="fa fa-arrow-up" id="go-up" title="回到顶部" aria-hidden="true"></i></div></section><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@3/instantpage.min.js" type="module"></script><script src="/js/third-party/click_heart.js"></script></body></html>
