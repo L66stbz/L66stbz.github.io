@@ -36,6 +36,10 @@
     
     
     
+      <category term="Linux" scheme="https://l66stbz.github.io/tags/Linux/"/>
+    
+      <category term="ELK" scheme="https://l66stbz.github.io/tags/ELK/"/>
+    
   </entry>
   
   <entry>
@@ -57,6 +61,12 @@
     </summary>
     
     
+    
+      <category term="Linux" scheme="https://l66stbz.github.io/tags/Linux/"/>
+    
+      <category term="Zabbix" scheme="https://l66stbz.github.io/tags/Zabbix/"/>
+    
+      <category term="Shell" scheme="https://l66stbz.github.io/tags/Shell/"/>
     
   </entry>
   
@@ -80,6 +90,12 @@
     
     
     
+      <category term="Linux" scheme="https://l66stbz.github.io/tags/Linux/"/>
+    
+      <category term="Zabbix" scheme="https://l66stbz.github.io/tags/Zabbix/"/>
+    
+      <category term="Shell" scheme="https://l66stbz.github.io/tags/Shell/"/>
+    
   </entry>
   
   <entry>
@@ -101,6 +117,10 @@
     </summary>
     
     
+    
+      <category term="Linux" scheme="https://l66stbz.github.io/tags/Linux/"/>
+    
+      <category term="Zabbix" scheme="https://l66stbz.github.io/tags/Zabbix/"/>
     
   </entry>
   
@@ -266,9 +286,9 @@
     
       <category term="Linux" scheme="https://l66stbz.github.io/tags/Linux/"/>
     
-      <category term="LVS" scheme="https://l66stbz.github.io/tags/LVS/"/>
-    
       <category term="Keepalived" scheme="https://l66stbz.github.io/tags/Keepalived/"/>
+    
+      <category term="LVS" scheme="https://l66stbz.github.io/tags/LVS/"/>
     
   </entry>
   
@@ -294,9 +314,9 @@
     
       <category term="Linux" scheme="https://l66stbz.github.io/tags/Linux/"/>
     
-      <category term="LVS" scheme="https://l66stbz.github.io/tags/LVS/"/>
-    
       <category term="Keepalived" scheme="https://l66stbz.github.io/tags/Keepalived/"/>
+    
+      <category term="LVS" scheme="https://l66stbz.github.io/tags/LVS/"/>
     
       <category term="Haproxy" scheme="https://l66stbz.github.io/tags/Haproxy/"/>
     
